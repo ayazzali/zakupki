@@ -1,0 +1,74 @@
+-contract
+	id [contracts] [products] [suppliers]
+	regnum [contracts]
+	number
+	publishdate [contracts]
+	signdate [contracts]
+	versionnumber
+	foundation
+		singlecustomer
+	customer
+		regnum
+		fullname
+		inn [contracts]
+		kpp
+		tofk
+	documentbase
+	price [contracts]
+	currency
+		code
+		name
+	execution
+		month
+		year
+	finances
+		financesource [contracts]
+		extrabudget
+			code
+			name
+		extrabudgetary
+			month
+			year
+			kogsu
+			price
+	products
+		product
+			okdp # products classification
+				code [products]
+				name [products]
+			name [products] # product name
+			country
+				countrycode
+				countryfullname
+			okei # product quantity measure
+				code [products]
+				name [products]
+			price [products]
+			quantity [products]
+			sum [products]
+		product ..
+	suppliers
+		supplier
+			participanttype [suppliers]
+			inn [suppliers]
+			kpp
+			organizationform [suppliers]
+			organizationname [suppliers]
+			country
+				countrycode
+				countryfullname
+			factualadress [suppliers]
+			postadress [suppliers]
+			contactinfo
+				lastname [suppliers]
+				firstname [suppliers]
+				middlename [suppliers]
+			contactemail [suppliers]
+			contactphone [suppliers]
+		supplier ..
+	printform
+		filename
+		url
+		cryptosigns
+			signature
+	currentcontractstage

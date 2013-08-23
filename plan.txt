@@ -1,0 +1,10 @@
+def retr(url)
+	retrieves a file via FTP, returns a file-like object
+
+def unzip(file)
+	unzips a file, returns a file-like object
+
+def contract(file)
+def contract_procedure(file)
+def contract_cancel(file)
+	parses XML, returns a tuple ready for inserting into db
