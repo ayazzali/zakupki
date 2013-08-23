@@ -51,7 +51,6 @@ for region in folders:
 			print('[DONE]')
 		except:
 			print('[ERROR]')
-	break
 
 # daily records
 for region in folders:
