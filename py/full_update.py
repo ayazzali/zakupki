@@ -26,7 +26,7 @@ ns = { # XML namespace
 
 # connect postgresql database
 print(ts(), 'Connecting database zakupki...', end='\t')
-zakupki_db = db.connect(host='localhost', database='zakupki', user='roveo', password='test')
+zakupki_db = db.connect(database='zakupki', user='roveo')
 zakupki_cur = zakupki_db.cursor()
 print('[DONE]')
 # truncate tables

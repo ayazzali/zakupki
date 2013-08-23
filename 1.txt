@@ -1,0 +1,9 @@
+[2013-08-23 14:13:53.326102] connecting FTP...	[DONE]
+[2013-08-23 14:13:54.255613] Connecting database zakupki...	Traceback (most recent call last):
+  File "py/full_update.py", line 29, in <module>
+    zakupki_db = db.connect(host='localhost', database='zakupki', user='roveo', password='test')
+  File "/usr/lib/python3/dist-packages/psycopg2/__init__.py", line 179, in connect
+    connection_factory=connection_factory, async=async)
+psycopg2.OperationalError: FATAL:  password authentication failed for user "roveo"
+FATAL:  password authentication failed for user "roveo"
+
