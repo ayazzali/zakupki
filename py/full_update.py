@@ -25,47 +25,58 @@ ns = { # XML namespace
 # n_lst = ['OK', 'EF', 'ZK', 'PO', 'SZ', 'Cancel']
 
 # connect postgresql database
+print(ts(), 'Connecting database zakupki...', end='\t')
 zakupki_db = db.connect(host='localhost', database='zakupki', user='roveo', password='test')
 zakupki_cur = zakupki_db.cursor()
-# truncate tables
+print('[DONE]')
+truncate tables
+print(ts(), 'Truncating...', end='\t')
 zakupki_cur.execute('truncate table notifications;')
 zakupki_db.commit()
+print('[DONE]')
 
 for region in folders:
 	# months' records
 	zakupki_ftp.cwd('/' + region + '/notifications') # change wd
 	file_names = zakupki_ftp.nlst('*.zip') # list zip files
 	for file_name in file_names:
-		print(ts(), file_name, end='\t')
-		zip_file = retr(zakupki_ftp, file_name)
-		xml_file = unzip(zip_file)
-		xml = etree.parse(xml_file)
-		zip_file.close()
-		xml_file.close()
-		for notification in xml.xpath('/*/*', namespaces=ns):
-			row = notification_xml(notification, ns) + (region,)
-			zakupki_cur.execute('''
-				insert into notifications
-				(rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_address, email, phone, href, print_form, folder_name)
-				values
-				(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-			''', row)
-			zakupki_db.commit()
-		print('[DONE]')
+		try:
+			print(ts(), file_name, end='\t')
+			zip_file = retr(zakupki_ftp, file_name, retry=5)
+			xml_file = unzip(zip_file)
+			xml = etree.parse(xml_file)
+			zip_file.close()
+			xml_file.close()
+			insert_notifications(zakupki_db, xml, ns, region)
+			print('[DONE]')
+		except:
+			print('[ERROR]')
 	break
 
+# daily records
 for region in folders:
-	# daily records
-	zakupki_ftp.cwd('/' + region + '/notifications/daily')
+	cwd = '/' + region + '/notifications/daily/'
+	zakupki_ftp.cwd(cwd)
 	# max_date in db
 	zakupki_cur.execute('select max(publish_date) from notifications where folder_name = %s;', (region,))
-	max_date = zakupki_cur.fetchone()[0]
-	# print(max_date)
-	start_date = max_date + timedelta(days=1)
-	# print(type(max_date))
-	mask = '*{date1}_000000_{date2}_000000*'.format(date1=start_date.strftime('%Y%m%d'), date2=(start_date + timedelta(days=1)).strftime('%Y%m%d'))
-	print(zakupki_ftp.nlst(mask))
-	break
+	current_date = zakupki_cur.fetchone()[0] + timedelta(days=1)
+	end_date = datetime.today()
+	while current_date <= end_date: # from last date in this region to today
+		mask = '*{date1}_000000_{date2}_000000*'.format(date1=current_date.strftime('%Y%m%d'), date2=(current_date + timedelta(days=1)).strftime('%Y%m%d'))
+		file_names = zakupki_ftp.nlst(mask)
+		for file_name in file_names:
+			try:
+				print(ts(), file_name, end='\t')
+				zip_file = retr(zakupki_ftp, file_name)
+				xml_file = unzip(zip_file)
+				xml = etree.parse(xml_file)
+				zip_file.close()
+				xml_file.close()
+				insert_notifications(zakupki_db, xml, ns, region)
+				print('[DONE]')
+			except:
+				print('[ERROR]')
+		current_date += timedelta(days=1)
 
 zakupki_ftp.close()
 zakupki_cur.close()

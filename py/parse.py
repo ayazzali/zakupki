@@ -1,5 +1,6 @@
 from lxml import etree
 from datetime import datetime
+from file_utils import *
 
 def retrieve(xml, xpath, namespaces, fun=lambda x: x):
 	try:
@@ -10,10 +11,10 @@ def retrieve(xml, xpath, namespaces, fun=lambda x: x):
 def parse_date(date):
 	return datetime.strptime(date, '%Y-%m-%dT%H:%M:%S')
 
-def lots_xml(xml, namespaces):
-	return None
+# def lots_xml(xml, namespaces):
+# 	return None
 
-def notification_xml(xml, namespaces):
+def parse_notification(xml, namespaces):
 	rec_id = retrieve(xml, './s:id/text()', namespaces, int)
 	notification_number = retrieve(xml, './s:notificationNumber/text()', namespaces)
 	notification_type = retrieve(xml, './s:placingWay/s:code/text()', namespaces)
@@ -32,3 +33,16 @@ def notification_xml(xml, namespaces):
 	href = retrieve(xml, './s:href/text()', namespaces)
 	print_form = retrieve(xml, './s:printForm/s:url/text()', namespaces)
 	return (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_adress, email, phone, href, print_form)
+
+def insert_notifications(pg_connection, xml, namespaces, region):
+	for notification in xml.xpath('/*/*', namespaces=namespaces):
+		row = parse_notification(notification, namespaces) + (region,)
+		cur = pg_connection.cursor()
+		cur.execute('''
+			insert into notifications
+			(rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_address, email, phone, href, print_form, folder_name)
+			values
+			(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+		''', row)
+		pg_connection.commit()
+		cur.close()
