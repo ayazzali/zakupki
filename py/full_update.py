@@ -29,7 +29,7 @@ print(ts(), 'Connecting database zakupki...', end='\t')
 zakupki_db = db.connect(host='localhost', database='zakupki', user='roveo', password='test')
 zakupki_cur = zakupki_db.cursor()
 print('[DONE]')
-truncate tables
+# truncate tables
 print(ts(), 'Truncating...', end='\t')
 zakupki_cur.execute('truncate table notifications;')
 zakupki_db.commit()
