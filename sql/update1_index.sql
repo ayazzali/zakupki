@@ -1,0 +1,1 @@
+﻿create index ind_notification_publish_date on notifications (publish_date);

@@ -10,7 +10,7 @@ def contract_cancel(file)
 	parses XML, returns a tuple ready for inserting into db
 
 --- update1 ---
-1. Добавить индекс по publish_date, folder_name в таблицу notifications.
+[DONE] 1. Добавить индекс по publish_date, folder_name в таблицу notifications.
 2. Переписать insert на метод COPY вместо построчного, либо другой более эффективный.
 3. Добавить в таблицу notifications колонку max_price с ценой – суммой максимальной стоимости лотов.
 4. Добавить в базу таблицу lots со списком лотов для каждой записи (id PK). Добавить индекс по id.
