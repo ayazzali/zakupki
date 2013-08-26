@@ -9,6 +9,15 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
+-- Name: notifications; Type: SCHEMA; Schema: -; Owner: roveo
+--
+
+CREATE SCHEMA notifications;
+
+
+ALTER SCHEMA notifications OWNER TO roveo;
+
+--
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
 --
 
@@ -84,6 +93,16 @@ ALTER TABLE ONLY notifications
 --
 
 CREATE INDEX ind_notification_publish_date ON notifications USING btree (publish_date);
+
+
+--
+-- Name: notifications; Type: ACL; Schema: -; Owner: roveo
+--
+
+REVOKE ALL ON SCHEMA notifications FROM PUBLIC;
+REVOKE ALL ON SCHEMA notifications FROM roveo;
+GRANT ALL ON SCHEMA notifications TO roveo;
+GRANT ALL ON SCHEMA notifications TO admin;
 
 
 --
