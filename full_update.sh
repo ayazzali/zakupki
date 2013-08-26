@@ -1,2 +1,2 @@
-# python3 /home/roveo/data/zakupki/py/full_update.py &>> /home/roveo/data/zakupki/logs/full_update.log
-python3 /home/roveo/dev/zakupki/py/full_update.py &>> /home/roveo/dev/zakupki/logs/full_update.log
+# python3 ~/data/zakupki/py/full_update.py &>> ~/data/zakupki/logs/full_update.log
+python3 ~/dev/zakupki/py/full_update.py &>> ~/dev/zakupki/logs/full_update.log
