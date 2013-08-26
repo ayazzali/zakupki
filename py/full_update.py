@@ -33,8 +33,6 @@ print('[DONE]')
 print(ts(), 'Truncating...', end='\t')
 zakupki_cur.execute('truncate table notifications;')
 zakupki_db.commit()
-zakupki_cur.execute('drop index ind_notification_publish_date;')
-zakupki_db.commit()
 print('[DONE]')
 
 for region in folders:
@@ -78,9 +76,6 @@ for region in folders:
 			except:
 				print('[ERROR]')
 		current_date += timedelta(days=1)
-
-zakupki_cur.execute('create index ind_notification_publish_date on notifications (publish_date);')
-zakupki_db.commit()
 
 zakupki_ftp.close()
 zakupki_cur.close()
