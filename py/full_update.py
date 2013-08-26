@@ -3,7 +3,6 @@ import re
 import psycopg2 as db
 from lxml import etree
 from datetime import datetime, timedelta
-import traceback
 
 from file_utils import * # ts(), retr(), unzip()
 from parse import *      # notification()
@@ -40,13 +39,7 @@ for region in folders:
 	# months' records
 	zakupki_ftp.cwd('/' + region + '/notifications') # change wd
 	file_names = zakupki_ftp.nlst('*.zip') # list zip files
-	try:
-		insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
-		print('[DONE]')
-	except KeyboardInterrupt:
-		quit()
-	except:
-		traceback.print_exc()
+	insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
 
 # daily records
 for region in folders:

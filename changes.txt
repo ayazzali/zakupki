@@ -14,7 +14,8 @@ def contract_cancel(file)
 
 --- update2 ---
 !- Добавить индекс по publish_date, в таблицу notifications.
-- Убрать цикл пробегания по файлам в insert_notifications(files=[], db_con, ftp_con, namespace, region)
+!- Убрать цикл пробегания по файлам в insert_notifications(files=[], db_con, ftp_con, namespace, region)
 - Добавить в таблицу notifications колонку max_price с ценой – суммой максимальной стоимости лотов.
 - Добавить в базу таблицу lots со списком лотов для каждой записи (id PK). Добавить индекс по id.
 - Добавить скрипт для ежедневного обновления.
+!- Передвинуть работу с ошибками внутрь функции insert_notifications.
