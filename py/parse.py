@@ -27,22 +27,23 @@ def parse_notification(xml, namespaces):
 	last_name = retrieve(xml, './s:contactInfo/s:contactPerson/s:lastName/text()', namespaces)
 	first_name = retrieve(xml, './s:contactInfo/s:contactPerson/s:firstName/text()', namespaces)
 	middle_name = retrieve(xml, './s:contactInfo/s:contactPerson/s:middleName/text()', namespaces)
-	post_adress = retrieve(xml, './s:contactInfo/s:orgPostAddress/text()', namespaces)
+	post_address = retrieve(xml, './s:contactInfo/s:orgPostAddress/text()', namespaces)
 	email = retrieve(xml, './s:contactInfo/s:contactEMail/text()', namespaces)
 	phone = retrieve(xml, './s:contactInfo/s:contactPhone/text()', namespaces)
 	href = retrieve(xml, './s:href/text()', namespaces)
 	print_form = retrieve(xml, './s:printForm/s:url/text()', namespaces)
-	return (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_adress, email, phone, href, print_form)
+	return (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_address, email, phone, href, print_form)
 
 def insert_notifications(pg_connection, xml, namespaces, region):
+	rows = []
 	for notification in xml.xpath('/*/*', namespaces=namespaces):
 		row = parse_notification(notification, namespaces) + (region,)
+		rows.append(row)
+	if len(rows) > 0:
 		cur = pg_connection.cursor()
-		cur.execute('''
-			insert into notifications
-			(rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_address, email, phone, href, print_form, folder_name)
-			values
-			(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-		''', row)
+		query = cur.mogrify('insert into notifications (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_address, email, phone, href, print_form, folder_name)\nvalues ' + ',\n'.join(['%s'] * len(rows)), rows)
+		cur.execute(query)
 		pg_connection.commit()
 		cur.close()
+
+# ssh://gitolite@gerrit.inn.ru/ANALYTICS/analytics.git

@@ -40,42 +40,43 @@ for region in folders:
 	zakupki_ftp.cwd('/' + region + '/notifications') # change wd
 	file_names = zakupki_ftp.nlst('*.zip') # list zip files
 	for file_name in file_names:
-		try:
-			print(ts(), file_name, end='\t')
-			zip_file = retr(zakupki_ftp, file_name, retry=5)
-			xml_file = unzip(zip_file)
-			xml = etree.parse(xml_file)
-			zip_file.close()
-			xml_file.close()
-			insert_notifications(zakupki_db, xml, ns, region)
-			print('[DONE]')
-		except:
-			print('[ERROR]')
+		# try:
+		print(ts(), file_name, end='\t')
+		zip_file = retr(zakupki_ftp, file_name, retry=5)
+		xml_file = unzip(zip_file)
+		xml = etree.parse(xml_file)
+		zip_file.close()
+		xml_file.close()
+		insert_notifications(zakupki_db, xml, ns, region)
+		print('[DONE]')
+		# except:
+			# print('[ERROR]')
+	break
 
 # daily records
-for region in folders:
-	cwd = '/' + region + '/notifications/daily/'
-	zakupki_ftp.cwd(cwd)
-	# max_date in db
-	zakupki_cur.execute('select max(publish_date) from notifications where folder_name = %s;', (region,))
-	current_date = zakupki_cur.fetchone()[0] + timedelta(days=1)
-	end_date = datetime.today()
-	while current_date <= end_date: # from last date in this region to today
-		mask = '*{date1}_000000_{date2}_000000*'.format(date1=current_date.strftime('%Y%m%d'), date2=(current_date + timedelta(days=1)).strftime('%Y%m%d'))
-		file_names = zakupki_ftp.nlst(mask)
-		for file_name in file_names:
-			try:
-				print(ts(), file_name, end='\t')
-				zip_file = retr(zakupki_ftp, file_name)
-				xml_file = unzip(zip_file)
-				xml = etree.parse(xml_file)
-				zip_file.close()
-				xml_file.close()
-				insert_notifications(zakupki_db, xml, ns, region)
-				print('[DONE]')
-			except:
-				print('[ERROR]')
-		current_date += timedelta(days=1)
+# for region in folders:
+# 	cwd = '/' + region + '/notifications/daily/'
+# 	zakupki_ftp.cwd(cwd)
+# 	# max_date in db
+# 	zakupki_cur.execute('select max(publish_date) from notifications where folder_name = %s;', (region,))
+# 	current_date = zakupki_cur.fetchone()[0] + timedelta(days=1)
+# 	end_date = datetime.today()
+# 	while current_date <= end_date: # from last date in this region to today
+# 		mask = '*{date1}_000000_{date2}_000000*'.format(date1=current_date.strftime('%Y%m%d'), date2=(current_date + timedelta(days=1)).strftime('%Y%m%d'))
+# 		file_names = zakupki_ftp.nlst(mask)
+# 		for file_name in file_names:
+# 			try:
+# 				print(ts(), file_name, end='\t')
+# 				zip_file = retr(zakupki_ftp, file_name)
+# 				xml_file = unzip(zip_file)
+# 				xml = etree.parse(xml_file)
+# 				zip_file.close()
+# 				xml_file.close()
+# 				insert_notifications(zakupki_db, xml, ns, region)
+# 				print('[DONE]')
+# 			except:
+# 				print('[ERROR]')
+# 		current_date += timedelta(days=1)
 
 zakupki_ftp.close()
 zakupki_cur.close()
