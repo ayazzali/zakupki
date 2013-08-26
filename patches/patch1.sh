@@ -1,1 +1,0 @@
-psql -U roveo -d zakupki -f /home/roveo/data/zakupki/sql/patch1.sql

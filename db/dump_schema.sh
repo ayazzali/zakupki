@@ -1,0 +1,1 @@
+pg_dump -U roveo zakupki --schema-only > schema.dump

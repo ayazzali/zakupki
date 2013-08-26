@@ -45,5 +45,3 @@ def insert_notifications(pg_connection, xml, namespaces, region):
 		cur.execute(query)
 		pg_connection.commit()
 		cur.close()
-
-# ssh://gitolite@gerrit.inn.ru/ANALYTICS/analytics.git
