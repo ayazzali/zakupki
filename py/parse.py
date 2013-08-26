@@ -34,14 +34,18 @@ def parse_notification(xml, namespaces):
 	print_form = retrieve(xml, './s:printForm/s:url/text()', namespaces)
 	return (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_address, email, phone, href, print_form)
 
-def insert_notifications(pg_connection, xml, namespaces, region):
-	rows = []
-	for notification in xml.xpath('/*/*', namespaces=namespaces):
-		row = parse_notification(notification, namespaces) + (region,)
-		rows.append(row)
-	if len(rows) > 0:
-		cur = pg_connection.cursor()
-		query = cur.mogrify('insert into notifications (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_address, email, phone, href, print_form, folder_name)\nvalues ' + ',\n'.join(['%s'] * len(rows)), rows)
-		cur.execute(query)
-		pg_connection.commit()
-		cur.close()
+def insert_notifications(file_names, db_connection, ftp_connection, namespaces, region):
+	for file_name in file_names:
+		print(ts(), file_name)
+		zip_file = retr(ftp_connection, file_name, retry=5)
+		xml_file = unzip(zip_file)
+		xml = etree.parse(xml_file)
+		zip_file.close()
+		xml_file.close()
+		rows = list([parse_notification(notification, namespaces) + (region,) for notification in xml.xpath('/*/*', namespaces=namespaces)])
+		if len(rows) > 0:
+			cur = db_connection.cursor()
+			query = cur.mogrify('insert into notifications (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_address, email, phone, href, print_form, folder_name)\nvalues ' + ',\n'.join(['%s'] * len(rows)), rows)
+			cur.execute(query)
+			db_connection.commit()
+			cur.close()

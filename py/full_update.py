@@ -3,6 +3,7 @@ import re
 import psycopg2 as db
 from lxml import etree
 from datetime import datetime, timedelta
+import traceback
 
 from file_utils import * # ts(), retr(), unzip()
 from parse import *      # notification()
@@ -39,18 +40,13 @@ for region in folders:
 	# months' records
 	zakupki_ftp.cwd('/' + region + '/notifications') # change wd
 	file_names = zakupki_ftp.nlst('*.zip') # list zip files
-	for file_name in file_names:
-		try:
-			print(ts(), file_name, end='\t')
-			zip_file = retr(zakupki_ftp, file_name, retry=5)
-			xml_file = unzip(zip_file)
-			xml = etree.parse(xml_file)
-			zip_file.close()
-			xml_file.close()
-			insert_notifications(zakupki_db, xml, ns, region)
-			print('[DONE]')
-		except:
-			print('[ERROR]')
+	try:
+		insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
+		print('[DONE]')
+	except KeyboardInterrupt:
+		quit()
+	except:
+		traceback.print_exc()
 
 # daily records
 for region in folders:
@@ -63,19 +59,7 @@ for region in folders:
 	while current_date <= end_date: # from last date in this region to today
 		mask = '*{date1}_000000_{date2}_000000*'.format(date1=current_date.strftime('%Y%m%d'), date2=(current_date + timedelta(days=1)).strftime('%Y%m%d'))
 		file_names = zakupki_ftp.nlst(mask)
-		for file_name in file_names:
-			try:
-				print(ts(), file_name, end='\t')
-				zip_file = retr(zakupki_ftp, file_name)
-				xml_file = unzip(zip_file)
-				xml = etree.parse(xml_file)
-				zip_file.close()
-				xml_file.close()
-				insert_notifications(zakupki_db, xml, ns, region)
-				print('[DONE]')
-			except:
-				print('[ERROR]')
-		current_date += timedelta(days=1)
+		insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
 
 zakupki_ftp.close()
 zakupki_cur.close()

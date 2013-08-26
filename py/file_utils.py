@@ -15,7 +15,6 @@ def retr(ftp_connection, path, retry=3): # retrieve file via FTP and return
 			return retr(ftp_connection, path, retry-1) # recursively call retr until retry is 0 (retry times)
 		else:
 			tmp.close()
-			print(ts(), '[ERROR]')
 			return None
 	return tmp
 
