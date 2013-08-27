@@ -3,6 +3,7 @@ import re
 import psycopg2 as db
 from lxml import etree
 from datetime import datetime, timedelta
+import gc
 
 from file_utils import * # ts(), retr(), unzip()
 from parse import *      # notification()
@@ -40,6 +41,7 @@ for region in folders:
 	zakupki_ftp.cwd('/' + region + '/notifications') # change wd
 	file_names = zakupki_ftp.nlst('*.zip') # list zip files
 	insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
+	gc.collect()
 
 # daily records
 for region in folders:
@@ -53,6 +55,7 @@ for region in folders:
 		mask = '*{date1}_000000_{date2}_000000*'.format(date1=current_date.strftime('%Y%m%d'), date2=(current_date + timedelta(days=1)).strftime('%Y%m%d'))
 		file_names = zakupki_ftp.nlst(mask)
 		insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
+	gc.collect()
 
 zakupki_ftp.close()
 zakupki_cur.close()
