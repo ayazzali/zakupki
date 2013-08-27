@@ -1,3 +1,4 @@
+import argparse
 from ftplib import FTP
 import re
 import psycopg2 as db
@@ -8,55 +9,60 @@ import gc
 from file_utils import * # ts(), retr(), unzip()
 from parse import *      # notification()
 
-re_file = re.compile('.*\..*') # filter folders
+if __name__ == '__main__':
+	# command line arguments
+	'''Please provide 2 arguments:
+		1. Update type [daily, full]
+		2. Update scope [all, notifications]'''
+	argparser = argparse.ArgumentParser()
+	argparser.add_argument(dest='type', choices=('daily', 'full'))
+	argparser.add_argument('-n', '--notifications', dest='scope', action='append_const', const='notifications')
+	args = argparser.parse_args()
+	if not args.scope: args.scope = ['notifications']
 
-# connect FTP
-print(ts(), 'connecting FTP...', end='\t')
-zakupki_ftp = FTP('ftp.zakupki.gov.ru', 'free', 'free')
-print('[DONE]')
+	# connect FTP
+	print(ts(), 'connecting FTP...', end='\t')
+	zakupki_ftp = FTP('ftp.zakupki.gov.ru', 'free', 'free')
+	print('[DONE]')
 
-# NLST folders
-folders = (name for name in zakupki_ftp.nlst() if not re_file.match(name))
+	# connect postgresql database
+	print(ts(), 'Connecting database zakupki...', end='\t')
+	zakupki_db = db.connect(database='zakupki', user='roveo')
+	zakupki_cur = zakupki_db.cursor()
+	print('[DONE]')
 
-ns = { # XML namespace
-		'd': ':http://zakupki.gov.ru/oos/export/1',
-		's': 'http://zakupki.gov.ru/oos/types/1'
-	}
+	if args.type == 'full':
+		# truncate tables and drop indices
+		print(ts(), 'Truncating...', end='\t')
+		zakupki_cur.execute('truncate table notifications;')
+		zakupki_db.commit()
+		print('[DONE]')
 
-# n_lst = ['OK', 'EF', 'ZK', 'PO', 'SZ', 'Cancel']
+	# NLST folders
+	re_file = re.compile('.*\..*') # filter folders
+	folders = (name for name in zakupki_ftp.nlst() if not re_file.match(name))
 
-# connect postgresql database
-print(ts(), 'Connecting database zakupki...', end='\t')
-zakupki_db = db.connect(database='zakupki', user='roveo')
-zakupki_cur = zakupki_db.cursor()
-print('[DONE]')
-# truncate tables and drop indices
-print(ts(), 'Truncating...', end='\t')
-zakupki_cur.execute('truncate table notifications;')
-zakupki_db.commit()
-print('[DONE]')
+	ns = {'d': ':http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1'} # XML namespace
+	# ['OK', 'EF', 'ZK', 'PO', 'SZ', 'Cancel']
 
-for region in folders:
-	# months' records
-	zakupki_ftp.cwd('/' + region + '/notifications') # change wd
-	file_names = zakupki_ftp.nlst('*.zip') # list zip files
-	insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
-	gc.collect()
+	for scope in args.scope:
+		for region in folders:
+			zakupki_ftp.cwd('/{region}/{scope}'.format(region=region, scope=scope)) # change wd
+			if args.type == 'daily':
+				zakupki_ftp.cwd('daily')
+				zakupki_cur.execute('select max(publish_date) from notifications where folder_name = %s;', (region,))
+				current_date = zakupki_cur.fetchone()[0] + timedelta(days=1)
+				end_date = datetime.today() - timedelta(days=1)
+				while current_date <= end_date: # from last date in this region to today
+					mask = current_date.strftime('*{%Y%m%d_000000_') + (current_date + timedelta(days=1)).strftime('%Y%m%d_000000*')
+					print(mask)
+					# file_names = zakupki_ftp.nlst(mask)
+					# insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
+					# file_names = zakupki_ftp.nlst('*.zip') # list zip files
+					# insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
+					# gc.collect()
+					current_date += timedelta(days=1)
 
-# daily records
-for region in folders:
-	cwd = '/' + region + '/notifications/daily/'
-	zakupki_ftp.cwd(cwd)
-	# max_date in db
-	zakupki_cur.execute('select max(publish_date) from notifications where folder_name = %s;', (region,))
-	current_date = zakupki_cur.fetchone()[0] + timedelta(days=1)
-	end_date = datetime.today()
-	while current_date <= end_date: # from last date in this region to today
-		mask = '*{date1}_000000_{date2}_000000*'.format(date1=current_date.strftime('%Y%m%d'), date2=(current_date + timedelta(days=1)).strftime('%Y%m%d'))
-		file_names = zakupki_ftp.nlst(mask)
-		insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
-	gc.collect()
-
-zakupki_ftp.close()
-zakupki_cur.close()
-zakupki_db.close()
+	zakupki_ftp.close()
+	zakupki_cur.close()
+	zakupki_db.close()

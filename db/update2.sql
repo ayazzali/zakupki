@@ -2,4 +2,3 @@
 
 alter table notifications
 	add column max_price numeric(36, 4);
-
