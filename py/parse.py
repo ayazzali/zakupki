@@ -43,11 +43,10 @@ def parse_lots(xml, namespaces):
 
 def insert_notifications(file_names, db_connection, ftp_connection, namespaces, region):
 	for file_name in file_names:
-		print(ts(), file_name, end='\t')
+		print(ts(), file_name)
 		try:	
 			zip_file = retr(ftp_connection, file_name, retry=5)
 			xml_file = unzip(zip_file)
-			xml = etree.parse(xml_file)
 		except KeyboardInterrupt:
 			traceback.print_exc()
 			exit()
@@ -57,10 +56,13 @@ def insert_notifications(file_names, db_connection, ftp_connection, namespaces, 
 		except:
 			traceback.print_exc()
 			continue
+		notifications_rows = []
+		for event, xml in etree.iterparse(xml_file, tag='{http://zakupki.gov.ru/oos/export/1}*'):
+			if event == 'end' and xml.tag != '{http://zakupki.gov.ru/oos/export/1}export':
+				notifications_rows.append(parse_notification(xml, namespaces) + (region,))
+				xml.clear()
 		zip_file.close()
 		xml_file.close()
-		notifications_rows = list([parse_notification(notification, namespaces) + (region,) for notification in xml.xpath('/*/*', namespaces=namespaces)])
-		# print(list([parse_lots(x, namespaces) for x in xml.xpath('/*/*', namespaces=namespaces)]))
 		if len(notifications_rows) > 0:
 			try:
 				cur = db_connection.cursor()
@@ -77,4 +79,3 @@ def insert_notifications(file_names, db_connection, ftp_connection, namespaces, 
 			except:
 				traceback.print_exc()
 				continue
-		print(getrusage(RUSAGE_SELF).ru_maxrss)

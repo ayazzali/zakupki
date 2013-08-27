@@ -11,9 +11,6 @@ from parse import *      # notification()
 
 if __name__ == '__main__':
 	# command line arguments
-	'''Please provide 2 arguments:
-		1. Update type [daily, full]
-		2. Update scope [all, notifications]'''
 	argparser = argparse.ArgumentParser()
 	argparser.add_argument(dest='type', choices=('daily', 'full'))
 	argparser.add_argument('-n', '--notifications', dest='scope', action='append_const', const='notifications')
@@ -42,26 +39,25 @@ if __name__ == '__main__':
 	re_file = re.compile('.*\..*') # filter folders
 	folders = (name for name in zakupki_ftp.nlst() if not re_file.match(name))
 
-	ns = {'d': ':http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1'} # XML namespace
+	ns = {'d': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1'} # XML namespace
 	# ['OK', 'EF', 'ZK', 'PO', 'SZ', 'Cancel']
 
 	for scope in args.scope:
 		for region in folders:
 			zakupki_ftp.cwd('/{region}/{scope}'.format(region=region, scope=scope)) # change wd
+			file_names = []
 			if args.type == 'daily':
 				zakupki_ftp.cwd('daily')
 				zakupki_cur.execute('select max(publish_date) from notifications where folder_name = %s;', (region,))
 				current_date = zakupki_cur.fetchone()[0] + timedelta(days=1)
 				end_date = datetime.today() - timedelta(days=1)
 				while current_date <= end_date: # from last date in this region to today
-					mask = current_date.strftime('*{%Y%m%d_000000_') + (current_date + timedelta(days=1)).strftime('%Y%m%d_000000*')
-					print(mask)
-					# file_names = zakupki_ftp.nlst(mask)
-					# insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
-					# file_names = zakupki_ftp.nlst('*.zip') # list zip files
-					# insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
-					# gc.collect()
+					mask = current_date.strftime('*%Y%m%d_000000_') + (current_date + timedelta(days=1)).strftime('%Y%m%d_000000*.xml.zip')
+					file_names.extend(zakupki_ftp.nlst(mask))
 					current_date += timedelta(days=1)
+			elif args.type == 'full':
+				file_names.extend(zakupki_ftp.nlst('*.zip'))
+			insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
 
 	zakupki_ftp.close()
 	zakupki_cur.close()
