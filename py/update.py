@@ -54,7 +54,7 @@ if __name__ == '__main__':
 					current_date = last_date + timedelta(days=1)
 				else:
 					current_date = datetime.today() - timedelta(days=30)
-				end_date = datetime.today() - timedelta(days=1)
+				end_date = datetime.today()
 				while current_date <= end_date: # from last date in this region to today
 					mask = current_date.strftime('*%Y%m%d_000000_') + (current_date + timedelta(days=1)).strftime('%Y%m%d_000000*.xml.zip')
 					file_names.extend(zakupki_ftp.nlst(mask))
