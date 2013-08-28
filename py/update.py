@@ -49,7 +49,11 @@ if __name__ == '__main__':
 			if args.type == 'daily':
 				zakupki_ftp.cwd('daily')
 				zakupki_cur.execute('select max(publish_date) from notifications where folder_name = %s;', (region,))
-				current_date = zakupki_cur.fetchone()[0] + timedelta(days=1)
+				last_date = zakupki_cur.fetchone()[0]
+				if last_date:
+					current_date = zakupki_cur.fetchone()[0] + timedelta(days=1)
+				else:
+					current_date = datetime.today() - timedelta(months=1)
 				end_date = datetime.today() - timedelta(days=1)
 				while current_date <= end_date: # from last date in this region to today
 					mask = current_date.strftime('*%Y%m%d_000000_') + (current_date + timedelta(days=1)).strftime('%Y%m%d_000000*.xml.zip')
