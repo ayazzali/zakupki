@@ -51,7 +51,7 @@ if __name__ == '__main__':
 				zakupki_cur.execute('select max(publish_date) from notifications where folder_name = %s;', (region,))
 				last_date = zakupki_cur.fetchone()[0]
 				if last_date:
-					current_date = zakupki_cur.fetchone()[0] + timedelta(days=1)
+					current_date = last_date + timedelta(days=1)
 				else:
 					current_date = datetime.today() - timedelta(months=1)
 				end_date = datetime.today() - timedelta(days=1)
