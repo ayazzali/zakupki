@@ -53,7 +53,7 @@ if __name__ == '__main__':
 				if last_date:
 					current_date = last_date + timedelta(days=1)
 				else:
-					current_date = datetime.today() - timedelta(months=1)
+					current_date = datetime.today() - timedelta(days=30)
 				end_date = datetime.today() - timedelta(days=1)
 				while current_date <= end_date: # from last date in this region to today
 					mask = current_date.strftime('*%Y%m%d_000000_') + (current_date + timedelta(days=1)).strftime('%Y%m%d_000000*.xml.zip')
