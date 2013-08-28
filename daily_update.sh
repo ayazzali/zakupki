@@ -1,0 +1,1 @@
+sendemail -f leo.schwartz@icloud.com -t leo.schwartz@icloud.com -u $(date +"%Y-%m-%d") -m "test" -s smtp.mail.me.com:587 -xu leo.schwartz@me.com -xp Triest15 -o tls=yes
