@@ -2,7 +2,7 @@ from datetime import datetime, date, timedelta
 from tempfile import TemporaryFile
 from zipfile import ZipFile, ZipInfo
 
-ns = {'d': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1'} # XML namespace
+ns = {'exp': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1', 'int': 'http://zakupki.gov.ru/oos/integration/1'} # XML namespace
 
 def ts(): # return timestamp
 	return '[' + str(datetime.now()) + ']'

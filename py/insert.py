@@ -26,7 +26,7 @@ def insert_notifications(file_names, db, ftp, region):
 		if len(rows) > 0:
 			try:
 				cur = db.cursor()
-				query = cur.mogrify('insert into notifications (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_regnum, placer_name, order_name, last_name, first_name, middle_name, post_address, email, phone, href, print_form, max_price, folder_name)\nvalues ' + ',\n'.join(['%s'] * len(rows)), rows)
+				query = cur.mogrify('insert into notifications (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_reg_num, order_name, href, print_form, max_price, folder_name)\nvalues ' + ',\n'.join(['%s'] * len(rows)), rows)
 				cur.execute(query)
 				db.commit()
 				cur.close()
