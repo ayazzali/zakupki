@@ -14,10 +14,10 @@ config = {
 		'db':  psycopg2.connect(database='zakupki', user='roveo'),
 		'process': process_notifications
 	},
-	'organization': {
+	'organizations': {
 		'ftp': FTP('ftp.zakupki.gov.ru', 'anonymous'),
 		'db':  psycopg2.connect(database='zakupki', user='roveo'),
-		'process': lambda x: str(x)+'123'
+		'process': process_organizations
 	}
 }
 

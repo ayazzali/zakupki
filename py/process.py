@@ -36,3 +36,16 @@ def process_notifications(ftp, db, update_type):
 		ftp.cwd('/{region}/notifications'.format(region=region))
 		file_names = get_file_names(ftp, db, update_type, 'notifications', region)
 		insert_notifications(file_names, db, ftp, region)
+
+def process_organizations(ftp, db, update_type):
+	if update_type == 'all':
+		cur = db.cursor()
+		cur.execute('truncate table organizations cascade;')
+		cur.close()
+		mask = '*.xml.zip'
+		ftp.cwd('/auto/organization/all')
+	elif update_type == 'inc':
+		mask = 'organization_inc*.xml.zip'
+	ftp.cwd('/auto/organization/all')
+	file_names = ftp.nlst(mask)
+	insert_organizations(file_names, db, ftp)

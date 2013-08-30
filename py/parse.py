@@ -28,18 +28,17 @@ def parse_organization(xml):
 	reg_num = retrieve(xml, './s:regNumber/text()', int)
 	short_name = retrieve(xml, './s:shortName/text()')
 	full_name = retrieve(xml, './s:fullName/text()')
-	okato = retrieve(xml, './s:OKATO/text()')
+	okato = retrieve(xml, './s:factualAddress/s:OKATO/text()')
 	zip = retrieve(xml, './s:factualAddress/s:zip/text()')
-	postal_address = retrieve(xml, './s:/text()')
-	email = retrieve(xml, './s:/text()')
-	phone = retrieve(xml, './s:/text()')
-	fax = retrieve(xml, './s:/text()')
-	last_name = retrieve(xml, './s:/text()')
-	first_name = retrieve(xml, './s:/text()')
-	middle_name = retrieve(xml, './s:/text()')
-	inn = retrieve(xml, './s:/text()')
-	actua = retrieve(xml, './s:/text()')
-
+	postal_address = retrieve(xml, './s:postalAddress/text()')
+	email = retrieve(xml, './s:email/text()')
+	phone = retrieve(xml, './s:phone/text()')
+	fax = retrieve(xml, './s:fax/text()')
+	last_name = retrieve(xml, './s:contactPerson/s:lastName/text()')
+	first_name = retrieve(xml, './s:contactPerson/s:firstName/text()')
+	middle_name = retrieve(xml, './s:contactPerson/s:middleName/text()')
+	inn = retrieve(xml, './s:inn/text()')
+	actual = True if retrieve(xml, './s:actual/text()') == 'true' else False
 	return (reg_num, short_name, full_name, okato, zip, postal_address, email, phone, fax, last_name, first_name, middle_name, inn, actual)
 
 # def parse_lots(xml, namespaces):

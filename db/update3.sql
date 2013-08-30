@@ -27,10 +27,6 @@ alter table notifications
 	drop column post_address,
 	drop column email,
 	drop column phone
-	drop column placer_reg_num;
-
-alter table notifications
 	drop column placer_reg_num,
-	add column placer_reg_num bigint;
-alter table notifications
+	add column placer_reg_num bigint,
 	add constraint notifications_reg_num_fk foreign key (placer_reg_num) references organizations (reg_num);
