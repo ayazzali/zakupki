@@ -15,7 +15,7 @@ def get_file_names(ftp, db, update_type, section, region):
 		if last_date:
 			current_date = last_date + timedelta(days=1)
 		else:
-			current_date = datetime.today() - timedelta(days=30)
+			current_date = datetime.today() - timedelta(days=7)
 		end_date = datetime.today()
 		file_names = []
 		while current_date <= end_date: # from last date in this region to today
@@ -49,3 +49,15 @@ def process_organizations(ftp, db, update_type):
 	ftp.cwd('/auto/organization/all')
 	file_names = ftp.nlst(mask)
 	insert_organizations(file_names, db, ftp)
+
+def process_products(ftp, db, update_type):
+	if update_type == 'all':
+		cur = db.cursor()
+		cur.execute('truncate table products cascade;')
+		cur.close()
+		mask = '*.xml.zip'
+	elif update_type == 'inc':
+		mask = 'nsiProduct_inc*.xml.zip'
+	ftp.cwd('/auto/product')
+	file_names = ftp.nlst(mask)
+	insert_products(file_names, db, ftp)

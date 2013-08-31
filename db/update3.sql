@@ -6,7 +6,7 @@
 	zip int,
 	postal_address text,
 	email text,
-	phone character(16),
+	phone character(32),
 	fax text,
 	last_name text,
 	first_name text,
@@ -15,7 +15,7 @@
 	actual boolean,
 
 	constraint organizations_pk primary key (reg_num)
-)
+);
 
 truncate table notifications;
 
@@ -26,7 +26,16 @@ alter table notifications
 	drop column middle_name,
 	drop column post_address,
 	drop column email,
-	drop column phone
-	drop column placer_reg_num,
-	add column placer_reg_num bigint,
-	add constraint notifications_reg_num_fk foreign key (placer_reg_num) references organizations (reg_num);
+	drop column phone,
+	drop column placer_regnum;
+
+alter table notifications
+	add column placer_reg_num bigint;
+
+create table products (
+	code int,
+	parent_code int,
+	product_name text,
+
+	constraint products_pk primary key (code)
+)s

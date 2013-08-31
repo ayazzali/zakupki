@@ -18,6 +18,11 @@ config = {
 		'ftp': FTP('ftp.zakupki.gov.ru', 'anonymous'),
 		'db':  psycopg2.connect(database='zakupki', user='roveo'),
 		'process': process_organizations
+	},
+	'products': {
+		'ftp': FTP('ftp.zakupki.gov.ru', 'anonymous'),
+		'db':  psycopg2.connect(database='zakupki', user='roveo'),
+		'process': process_products
 	}
 }
 
@@ -26,7 +31,8 @@ if __name__ == '__main__':
 	argparser = argparse.ArgumentParser()
 	argparser.add_argument(dest='type', choices=('inc', 'all')) # incremental or full update
 	argparser.add_argument('-n', '--notifications', dest='sections', action='append_const', const='notifications')
-	argparser.add_argument('-o', '--organization', dest='sections', action='append_const', const='organizations')
+	argparser.add_argument('-o', '--organizations', dest='sections', action='append_const', const='organizations')
+	argparser.add_argument('-p', '--products', dest='sections', action='append_const', const='products')
 	args = argparser.parse_args()
 	if not args.sections: args.sections = ['notifications', 'organizations']
 

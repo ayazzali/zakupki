@@ -41,6 +41,16 @@ def parse_organization(xml):
 	actual = True if retrieve(xml, './s:actual/text()') == 'true' else False
 	return (reg_num, short_name, full_name, okato, zip, postal_address, email, phone, fax, last_name, first_name, middle_name, inn, actual)
 
+def parse_product(xml):
+	code = retrieve(xml, './s:code/text()')
+	try:
+		code = int(code)
+	except:
+		code = ord(code) # if code is an int, return int, if code is a char, return char ascii value
+	parent_code = retrieve(xml, './s:parentCode/text()', int)
+	product_name = retrieve(xml, './s:name/text()')
+	return (code, parent_code, product_name)
+
 # def parse_lots(xml, namespaces):
 # 	return (len(xml.xpath('./s:lots/s:lot', namespaces=namespaces)), len(xml.xpath('./s:lots/s:lot/s:products/s:product', namespaces=namespaces)), len(xml.xpath('./s:lots/s:lot/s:customerRequirements/s:customerRequirement', namespaces=namespaces)))
 
