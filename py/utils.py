@@ -2,6 +2,8 @@ from datetime import datetime, date, timedelta
 from tempfile import TemporaryFile
 from zipfile import ZipFile, ZipInfo
 
+ns = {'exp': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1', 'int': 'http://zakupki.gov.ru/oos/integration/1'} # XML namespace
+
 def ts(): # return timestamp
 	return '[' + str(datetime.now()) + ']'
 
@@ -24,3 +26,12 @@ def unzip(zip_file): # unzip a single file and return
 	unzipped = zf.open(zip_info)
 	zf.close()
 	return unzipped
+
+def retrieve(xml, xpath, fun=lambda x: x):
+	try:
+		return fun(xml.xpath(xpath, namespaces=ns, smart_strings=False)[0])
+	except:
+		return None
+
+def parse_date(date):
+	return datetime.strptime(date, '%Y-%m-%dT%H:%M:%S')
