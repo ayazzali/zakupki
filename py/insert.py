@@ -85,7 +85,7 @@ def insert_organizations(file_names, db, ftp):
 					except
 					select reg_num, short_name, full_name, okato, zip, postal_address, email, phone, fax, last_name, first_name, middle_name, inn, actual from upsert;
 					drop table new;
-					'''.format(tuples=tuples), rows)
+				'''.format(tuples=tuples), rows)
 				cur.execute(query)
 				db.commit()
 				cur.close()

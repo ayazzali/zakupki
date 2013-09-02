@@ -34,7 +34,7 @@ if __name__ == '__main__':
 	argparser.add_argument('-o', '--organizations', dest='sections', action='append_const', const='organizations')
 	argparser.add_argument('-p', '--products', dest='sections', action='append_const', const='products')
 	args = argparser.parse_args()
-	if not args.sections: args.sections = ['notifications', 'organizations']
+	if not args.sections: args.sections = ['products', 'organizations', 'notifications']
 
 	for section in args.sections:
 		db = config[section]['db']

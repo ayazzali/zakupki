@@ -38,4 +38,4 @@ create table products (
 	product_name text,
 
 	constraint products_pk primary key (code)
-)s
+);
