@@ -20,16 +20,17 @@ def insert_notifications(file_names, db, ftp, region):
 		for event, xml in etree.iterparse(xml_file, tag='{http://zakupki.gov.ru/oos/export/1}*'):
 			if event == 'end' and xml.tag != '{http://zakupki.gov.ru/oos/export/1}export':
 				rows.append(parse_notification(xml) + (region,))
+				parse_lot(xml)
 				xml.clear()
 		zip_file.close()
 		xml_file.close()
 		if len(rows) > 0:
 			try:
 				cur = db.cursor()
-				tuples = ',\n'.join(['%s'] * len(rows))
+				notifications_tuples = ',\n'.join(['%s'] * len(rows))
 				query = cur.mogrify('''
 					insert into notifications (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_reg_num, order_name, href, print_form, max_price, folder_name)
-					values {tuples}'''.format(tuples=tuples), rows)
+					values {notifications_tuples};'''.format(notifications_tuples=notifications_tuples), rows)
 				cur.execute(query)
 				db.commit()
 				cur.close()

@@ -24,6 +24,12 @@ def parse_notification(xml):
 	max_price = sum(map(float, xml.xpath('./s:lots/s:lot/s:customerRequirements/s:customerRequirement/s:maxPrice/text()', namespaces=ns, smart_strings=False)))
 	return (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_reg_num, order_name, href, print_form, max_price)
 
+def parse_lot(xml):
+	x = len(xml.xpath('./s:lots/s:lot', namespaces=ns))
+	if x != 1:
+		print(x)
+
+
 def parse_organization(xml):
 	reg_num = retrieve(xml, './s:regNumber/text()', int)
 	short_name = retrieve(xml, './s:shortName/text()')
@@ -51,6 +57,9 @@ def parse_product(xml):
 	product_name = retrieve(xml, './s:name/text()')
 	return (code, parent_code, product_name)
 
-# def parse_lots(xml, namespaces):
-# 	return (len(xml.xpath('./s:lots/s:lot', namespaces=namespaces)), len(xml.xpath('./s:lots/s:lot/s:products/s:product', namespaces=namespaces)), len(xml.xpath('./s:lots/s:lot/s:customerRequirements/s:customerRequirement', namespaces=namespaces)))
+
+
+
+
+
 
