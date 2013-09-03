@@ -5,7 +5,7 @@ from pymongo import MongoClient
 from etl import *
 from utils import *
 
-etl = {
+conf = {
 	'notifications': {
 		'etl': notifications_etl,
 		'ftp': FTP('ftp.zakupki.gov.ru', 'free', 'free')
@@ -24,6 +24,6 @@ if __name__ == '__main__':
 	db = client.zakupki
 	for coll in args.collections:
 		collection = db[coll]
-		ftp = etl[coll]['ftp']
-		etl[coll]['etl'](ftp, collection, args.type)
+		ftp = conf[coll]['ftp']
+		conf[coll]['etl'](ftp, collection, args.type)
 	client.close()

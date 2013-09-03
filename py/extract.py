@@ -14,4 +14,4 @@ def extract(ftp, f):
 	except:
 		traceback.print_exc()
 		continue
-	return 
+	return xml_file

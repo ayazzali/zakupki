@@ -3,12 +3,12 @@ from datetime import datetime, timedelta
 
 # from insert import *
 
-def inc_masks(collection):
-	today = datetime.today().strftime('%Y%m%d')
-	yesterday = (datetime.today() - timedelta(days=1)).strftime('%Y%m%d')
-	last_date = collection.find().sort([('dt', -1)]).limit(1)
-	print list(last_date)[0]
-	return None # '_inc_{y}_000000_{t}_000000_*.xml.zip'.format(y=yesterday, t=today)
+# def inc_masks(collection):
+# 	today = datetime.today().strftime('%Y%m%d')
+# 	yesterday = (datetime.today() - timedelta(days=1)).strftime('%Y%m%d')
+# 	last_date = collection.find().sort([('dt', -1)]).limit(1)
+# 	print list(last_date)[0]
+# 	return None # '_inc_{y}_000000_{t}_000000_*.xml.zip'.format(y=yesterday, t=today)
 
 def notifications_etl(ftp, collection, update_type):
 	re_file = re.compile('.*\..*') # filter folders
