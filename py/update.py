@@ -1,46 +1,29 @@
 import argparse
 from ftplib import FTP
-import re
-import psycopg2
-import psycopg2.extras
-from lxml import etree
-from datetime import datetime, timedelta
-import gc
+from pymongo import MongoClient
 
-from process import *
+from etl import *
+from utils import *
 
-config = {
+etl = {
 	'notifications': {
-		'ftp': FTP('ftp.zakupki.gov.ru', 'free', 'free'),
-		'db':  psycopg2.connect(database='zakupki', user='roveo'),
-		'process': process_notifications
-	},
-	'organizations': {
-		'ftp': FTP('ftp.zakupki.gov.ru', 'anonymous'),
-		'db':  psycopg2.connect(database='zakupki', user='roveo'),
-		'process': process_organizations
-	},
-	'products': {
-		'ftp': FTP('ftp.zakupki.gov.ru', 'anonymous'),
-		'db':  psycopg2.connect(database='zakupki', user='roveo'),
-		'process': process_products
+		'etl': notifications_etl,
+		'ftp': FTP('ftp.zakupki.gov.ru', 'free', 'free')
 	}
 }
 
 if __name__ == '__main__':
-	# command line arguments
-	argparser = argparse.ArgumentParser()
-	argparser.add_argument(dest='type', choices=('inc', 'all')) # incremental or full update
-	argparser.add_argument('-n', '--notifications', dest='sections', action='append_const', const='notifications')
-	argparser.add_argument('-o', '--organizations', dest='sections', action='append_const', const='organizations')
-	argparser.add_argument('-p', '--products', dest='sections', action='append_const', const='products')
-	args = argparser.parse_args()
-	if not args.sections: args.sections = ['products', 'organizations', 'notifications']
+	parser = argparse.ArgumentParser(description='Update zakupki database.')
+	parser.add_argument(choices=['all', 'inc'], dest='type', action='store')
+	parser.add_argument('-n', '--notifications', dest='collections', action='append_const', const='notifications')
+	args = parser.parse_args()
+	if not args.collections:
+		args.collections = ['notifications']
 
-	for section in args.sections:
-		db = config[section]['db']
-		psycopg2.extras.register_hstore(db)
-		ftp = config[section]['ftp']
-		config[section]['process'](ftp, db, args.type)
-		db.close()
-		ftp.close()
+	client = MongoClient()
+	db = client.zakupki
+	for coll in args.collections:
+		collection = db[coll]
+		ftp = etl[coll]['ftp']
+		etl[coll]['etl'](ftp, collection, args.type)
+	client.close()
