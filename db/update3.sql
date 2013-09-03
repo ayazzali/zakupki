@@ -17,21 +17,6 @@
 	constraint organizations_pk primary key (reg_num)
 );
 
-truncate table notifications;
-
-alter table notifications
-	drop column placer_name,
-	drop column last_name,
-	drop column first_name,
-	drop column middle_name,
-	drop column post_address,
-	drop column email,
-	drop column phone,
-	drop column placer_regnum;
-
-alter table notifications
-	add column placer_reg_num bigint;
-
 create table products (
 	code int,
 	parent_code int,
@@ -39,3 +24,18 @@ create table products (
 
 	constraint products_pk primary key (code)
 );
+
+drop table notifications;
+
+set role admin;
+create extension hstore;
+
+create table notifications (
+	id bigint default nextval('notifications_pk'),
+	folder_name character(64),
+	hlevel smallint not null,
+	hparent bigint null,
+	dict hstore not null,
+
+	constraint pk_notification_id primary key (id)
+)

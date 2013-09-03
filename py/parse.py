@@ -11,24 +11,19 @@ ns = {'exp': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/o
 # 	return None
 
 def parse_notification(xml):
-	rec_id = retrieve(xml, './s:id/text()', int)
-	notification_number = retrieve(xml, './s:notificationNumber/text()')
-	notification_type = retrieve(xml, './s:placingWay/s:code/text()')
-	version_number = retrieve(xml, './s:versionNumber/text()', int)
-	create_date = retrieve(xml, './s:createDate/text()', parse_date)
-	publish_date = retrieve(xml, './s:publishDate/text()', parse_date)
-	placer_reg_num = retrieve(xml, './s:order/s:placer/s:regNum/text()', int)
-	order_name = retrieve(xml, './s:orderName/text()')
-	href = retrieve(xml, './s:href/text()')
-	print_form = retrieve(xml, './s:printForm/s:url/text()')
-	max_price = sum(map(float, xml.xpath('./s:lots/s:lot/s:customerRequirements/s:customerRequirement/s:maxPrice/text()', namespaces=ns, smart_strings=False)))
-	return (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_reg_num, order_name, href, print_form, max_price)
-
-def parse_lot(xml):
-	x = len(xml.xpath('./s:lots/s:lot', namespaces=ns))
-	if x != 1:
-		print(x)
-
+	result = {}
+	result['rec_id'] = retrieve(xml, './s:id/text()', int)
+	result['notification_number'] = retrieve(xml, './s:notificationNumber/text()')
+	result['notification_type'] = retrieve(xml, './s:placingWay/s:code/text()')
+	result['version_number'] = retrieve(xml, './s:versionNumber/text()', int)
+	result['create_date'] = retrieve(xml, './s:createDate/text()', parse_date)
+	result['publish_date'] = retrieve(xml, './s:publishDate/text()', parse_date)
+	result['placer_reg_num'] = retrieve(xml, './s:order/s:placer/s:regNum/text()', int)
+	result['order_name'] = retrieve(xml, './s:orderName/text()')
+	result['href'] = retrieve(xml, './s:href/text()')
+	result['print_form'] = retrieve(xml, './s:printForm/s:url/text()')
+	# result['max_price'] = sum(map(float, xml.xpath('./s:lots/s:lot/s:customerRequirements/s:customerRequirement/s:maxPrice/text()', namespaces=ns, smart_strings=False)))
+	return result
 
 def parse_organization(xml):
 	reg_num = retrieve(xml, './s:regNumber/text()', int)

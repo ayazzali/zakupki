@@ -2,6 +2,7 @@ import argparse
 from ftplib import FTP
 import re
 import psycopg2
+import psycopg2.extras
 from lxml import etree
 from datetime import datetime, timedelta
 import gc
@@ -38,6 +39,7 @@ if __name__ == '__main__':
 
 	for section in args.sections:
 		db = config[section]['db']
+		psycopg2.extras.register_hstore(db)
 		ftp = config[section]['ftp']
 		config[section]['process'](ftp, db, args.type)
 		db.close()

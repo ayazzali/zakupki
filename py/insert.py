@@ -1,6 +1,8 @@
 from utils import *
 from parse import *
 
+ns = {'exp': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1', 'int': 'http://zakupki.gov.ru/oos/integration/1'} # XML namespace
+
 def insert_notifications(file_names, db, ftp, region):
 	for file_name in file_names:
 		print(ts(), file_name)
@@ -16,33 +18,29 @@ def insert_notifications(file_names, db, ftp, region):
 		except:
 			traceback.print_exc()
 			continue
-		rows = []
 		for event, xml in etree.iterparse(xml_file, tag='{http://zakupki.gov.ru/oos/export/1}*'):
 			if event == 'end' and xml.tag != '{http://zakupki.gov.ru/oos/export/1}export':
-				rows.append(parse_notification(xml) + (region,))
-				parse_lot(xml)
-				xml.clear()
+				try:
+					cur = db.cursor()
+					row = (region, 0, None, parse_notification(xml)) # form notification row: id (omitted), folder_name, hlevel 0, no parent, dict
+					# .format(tup=', '.join(['%s']*len(row)))
+					query = cur.mogrify('insert into notifications (folder_name, hlevel, hparent, dict) values %s', (row,))
+					print(query)
+					cur.execute(query)
+					db.commit()
+					cur.close()
+				except KeyboardInterrupt:
+					traceback.print_exc()
+					exit()
+				except AttributeError:
+					traceback.print_exc()
+					exit()
+				except:
+					traceback.print_exc()
+					continue
+					xml.clear()
 		zip_file.close()
 		xml_file.close()
-		if len(rows) > 0:
-			try:
-				cur = db.cursor()
-				notifications_tuples = ',\n'.join(['%s'] * len(rows))
-				query = cur.mogrify('''
-					insert into notifications (rec_id, notification_number, notification_type, version_number, create_date, publish_date, placer_reg_num, order_name, href, print_form, max_price, folder_name)
-					values {notifications_tuples};'''.format(notifications_tuples=notifications_tuples), rows)
-				cur.execute(query)
-				db.commit()
-				cur.close()
-			except KeyboardInterrupt:
-				traceback.print_exc()
-				exit()
-			except AttributeError:
-				traceback.print_exc()
-				exit()
-			except:
-				traceback.print_exc()
-				continue
 
 def insert_organizations(file_names, db, ftp):
 	for file_name in file_names:
