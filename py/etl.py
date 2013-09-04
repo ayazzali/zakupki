@@ -3,6 +3,7 @@ from lxml import etree
 from datetime import datetime, timedelta
 
 from extract import *
+from utils import *
 
 # def inc_masks(collection):
 # 	today = datetime.today().strftime('%Y%m%d')
@@ -26,13 +27,12 @@ def notifications_etl(ftp, collection, update_type):
 		files = ftp.nlst(mask)
 		for f in files:
 			xml_file = extract(ftp, f)
-			documents = []
-			for event, xml in etree.iterparse(xml_file, tag='{http://zakupki.gov.ru/oos/export/1}*'):
-				if event == 'end' and xml.tag != '{http://zakupki.gov.ru/oos/export/1}export':
-					documents.append(transform_notification(xml))
-					xml.clear()
-			load(collection, documents)
-
-		# xml = extract()
-		# file_names = get_file_names(ftp, db, update_type, 'notifications', region)
-		# insert_notifications(file_names, db, ftp, region)
+			if xml_file:
+				documents = []
+				for event, xml in etree.iterparse(xml_file, tag='{http://zakupki.gov.ru/oos/export/1}*'):
+					if event == 'end' and xml.tag != '{http://zakupki.gov.ru/oos/export/1}export':
+						documents.append(transform_notification(xml))
+						xml.clear()
+				load(collection, documents)
+			else:
+				print ts(), 'File not loaded!'

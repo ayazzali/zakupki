@@ -1,5 +1,6 @@
 from utils import *
 from datetime import datetime
+import traceback
 
 ns = {'exp': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1', 'int': 'http://zakupki.gov.ru/oos/integration/1'} # XML namespace
 
@@ -10,7 +11,7 @@ def retrieve(xml, path, fun=lambda x: x):
 		return None
 
 def parse_date(date_str):
-	return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')
+	return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S')
 
 def extract(ftp, f):
 	print ts(), f
@@ -25,7 +26,7 @@ def extract(ftp, f):
 		exit()
 	except:
 		traceback.print_exc()
-	# zip_file.close()
+		return None
 	return xml_file
 
 def load(collection, documents):
@@ -37,8 +38,9 @@ def transform_notification(xml):
 	document['id'] = retrieve(xml, './s:id/text()', int)
 	document['notification_number'] = retrieve(xml, './s:notificationNumber/text()', int)
 	document['version_number'] = retrieve(xml, './s:versionNumber/text()', int)
-	document['create_date'] = retrieve(xml, './s:createDate/text()')
-	document['placer_reg_num'] = retrieve(xml, './s:placer/s:regNum/text()')
+	document['placing_way'] = retrieve(xml, './s:placingWay/s:code/text()')
+	document['create_date'] = retrieve(xml, './s:createDate/text()', parse_date)
+	document['placer_reg_num'] = retrieve(xml, './s:order/s:placer/s:regNum/text()', int)
 	document['publish_date'] = retrieve(xml, './s:publishDate/text()', parse_date)
 	document['href'] = retrieve(xml, './s:href/text()')
 	document['document_metas'] = []
@@ -53,14 +55,14 @@ def transform_notification(xml):
 		lot = {}
 		lot['ordinal_number'] = retrieve(lot_xml, './s:ordinalNumber/text()', int)
 		lot['customer_requirements'] = []
-		for requirement_xml in xml.xpath('./s:customerRequirements/s:customerRequirement', namespaces=ns):
+		for requirement_xml in lot_xml.xpath('./s:customerRequirements/s:customerRequirement', namespaces=ns):
 			requirement = {}
 			requirement['quantity'] = retrieve(requirement_xml, './s:quantity/text()', int)
 			requirement['max_price'] = retrieve(requirement_xml, './s:maxPrice/text()', int)
 			requirement['delivery_term'] = retrieve(requirement_xml, './s:deliveryTerm/text()')
 			lot['customer_requirements'].append(requirement)
 		lot['products'] = []
-		for product_xml in xml.xpath('./s:products/s:product', namespaces=ns):
+		for product_xml in lot_xml.xpath('./s:products/s:product', namespaces=ns):
 			lot['products'].append(retrieve(product_xml, './s:code/text()', int))
 		document['lots'].append(lot)
 	return document

@@ -24,6 +24,8 @@ if __name__ == '__main__':
 	db = client.zakupki
 	for coll in args.collections:
 		collection = db[coll]
+		if args.type == 'all':
+			collection.drop()
 		ftp = conf[coll]['ftp']
 		conf[coll]['etl'](ftp, collection, args.type)
 	client.close()
