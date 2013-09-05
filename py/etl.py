@@ -8,9 +8,10 @@ from utils import *
 def inc_masks(collection, folder_name):
 	one_day = timedelta(days=1)
 	today = datetime.today()
-	try:
-		current_date = collection.find({'folder_name':folder_name},{'publish_date':1,'_id':0}).sort([('publish_date', -1)]).limit(1)[0]['publish_date'] + one_day
-	except IndexError:
+	cur = collection.find({'folder_name':folder_name},{'publish_date':1,'_id':0}).sort([('publish_date', -1)]).limit(1)
+	if cur.count() > 0:
+		current_date = list(cur)[0]['publish_date'] + one_day
+	else:
 		current_date = datetime.today() - timedelta(days=7)
 	masks = []
 	while current_date <= today:
@@ -31,7 +32,7 @@ def notifications_etl(ftp, collection, update_type):
 		elif update_type == 'all':
 			masks = ('*.xml.zip',)
 		for mask in masks:
-			files = ftp.nlst(mask)
+			files = nlst(ftp, mask)
 			for f in files:
 				xml_file = extract(ftp, f)
 				if xml_file:
@@ -43,5 +44,3 @@ def notifications_etl(ftp, collection, update_type):
 							documents.append(document)
 							xml.clear()
 					load(collection, documents)
-				else:
-					print ts(), 'File not loaded!'

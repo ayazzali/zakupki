@@ -1,6 +1,4 @@
 from utils import *
-from datetime import datetime
-import traceback
 
 def transform_notification(xml):
 	document = {}
