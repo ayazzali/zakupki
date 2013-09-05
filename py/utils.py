@@ -2,7 +2,8 @@ from datetime import datetime, date, timedelta
 from tempfile import TemporaryFile
 from zipfile import ZipFile, ZipInfo
 
-ns = {'exp': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1', 'int': 'http://zakupki.gov.ru/oos/integration/1'} # XML namespace
+def ns():
+	return {'exp': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1', 'int': 'http://zakupki.gov.ru/oos/integration/1'} # XML namespace
 
 def ts(): # return timestamp
 	return '[' + str(datetime.now()) + ']'
@@ -35,3 +36,23 @@ def retrieve(xml, xpath, fun=lambda x: x):
 
 def parse_date(date):
 	return datetime.strptime(date, '%Y-%m-%dT%H:%M:%S')
+
+def extract(ftp, f):
+	print ts(), f
+	try:	
+		zip_file = retr(ftp, f)
+		xml_file = unzip(zip_file)
+	except KeyboardInterrupt:
+		traceback.print_exc()
+		exit()
+	except AttributeError:
+		traceback.print_exc()
+		exit()
+	except:
+		traceback.print_exc()
+		return None
+	return xml_file
+
+def load(collection, documents):
+	for document in documents:
+		collection.insert(document)

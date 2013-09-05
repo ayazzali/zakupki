@@ -2,10 +2,6 @@ from utils import *
 from datetime import datetime
 import traceback
 
-ns = {'exp': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1', 'int': 'http://zakupki.gov.ru/oos/integration/1'} # XML namespace
-
-
-
 def transform_notification(xml):
 	document = {}
 	document['id'] = retrieve(xml, './s:id/text()', int)
@@ -17,25 +13,25 @@ def transform_notification(xml):
 	document['publish_date'] = retrieve(xml, './s:publishDate/text()', parse_date)
 	document['href'] = retrieve(xml, './s:href/text()')
 	document['document_metas'] = []
- 	for meta_xml in xml.xpath('./s:documentMetas/s:documentMeta', namespaces=ns):
+ 	for meta_xml in xml.xpath('./s:documentMetas/s:documentMeta', namespaces=ns()):
  		meta = {}
  		meta['file_name'] = retrieve(meta_xml, './s:fileName/text()')
  		meta['url'] = retrieve(meta_xml, './s:url/text()')
  		meta['doc_description'] = retrieve(meta_xml, './s:docDescription/text()')
  		document['document_metas'].append(meta)
 	document['lots'] = []
-	for lot_xml in xml.xpath('./s:lots/s:lot', namespaces=ns):
+	for lot_xml in xml.xpath('./s:lots/s:lot', namespaces=ns()):
 		lot = {}
 		lot['ordinal_number'] = retrieve(lot_xml, './s:ordinalNumber/text()', int)
 		lot['customer_requirements'] = []
-		for requirement_xml in lot_xml.xpath('./s:customerRequirements/s:customerRequirement', namespaces=ns):
+		for requirement_xml in lot_xml.xpath('./s:customerRequirements/s:customerRequirement', namespaces=ns()):
 			requirement = {}
 			requirement['quantity'] = retrieve(requirement_xml, './s:quantity/text()', int)
 			requirement['max_price'] = retrieve(requirement_xml, './s:maxPrice/text()', int)
 			requirement['delivery_term'] = retrieve(requirement_xml, './s:deliveryTerm/text()')
 			lot['customer_requirements'].append(requirement)
 		lot['products'] = []
-		for product_xml in lot_xml.xpath('./s:products/s:product', namespaces=ns):
+		for product_xml in lot_xml.xpath('./s:products/s:product', namespaces=ns()):
 			lot['products'].append(retrieve(product_xml, './s:code/text()', int))
 		document['lots'].append(lot)
 	return document
