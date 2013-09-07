@@ -2,8 +2,8 @@ import re
 from lxml import etree
 from datetime import datetime, timedelta
 
-from extract import *
-from utils import *
+from transform import *
+# from utils import *
 
 def inc_masks(collection, folder_name):
 	one_day = timedelta(days=1)
