@@ -3,8 +3,12 @@ from tempfile import TemporaryFile
 from zipfile import ZipFile, ZipInfo
 import traceback
 
-def ns():
-	return {'exp': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1', 'int': 'http://zakupki.gov.ru/oos/integration/1'} # XML namespace
+def ns(): # XML namespace
+	return {
+		'exp': 'http://zakupki.gov.ru/oos/export/1',
+		's': 'http://zakupki.gov.ru/oos/types/1',
+		'int': 'http://zakupki.gov.ru/oos/integration/1'
+	}
 
 def ts(): # return timestamp
 	return '[' + str(datetime.now()) + ']'
@@ -31,10 +35,13 @@ def retr(ftp, path, retry=3): # retrieve file via FTP and return
 		else:
 			tmp.close()
 			return None
-	if size != tmp.tell():
+	if size != tmp.tell(): # check if downloaded file size != file size on ftp
 		if retry > 0:
 			tmp.close()
 			return retr(ftp, path, retry-1)
+		else:
+			tmp.close()
+			return None
 	return tmp
 
 def unzip(zip_file): # unzip a single file and return
@@ -50,12 +57,15 @@ def retrieve(xml, xpath, fun=lambda x: x):
 	except:
 		return None
 
+def parse_datetime(date):
+	return datetime.strptime(date[:19], '%Y-%m-%dT%H:%M:%S')
+
 def parse_date(date):
-	return datetime.strptime(date, '%Y-%m-%dT%H:%M:%S')
+	return datetime.strptime(date, '%Y-%m-%d')
 
 def extract(ftp, f):
 	print ts(), f
-	try:	
+	try:
 		zip_file = retr(ftp, f, retry=10)
 		xml_file = unzip(zip_file)
 	except KeyboardInterrupt:
@@ -69,6 +79,11 @@ def extract(ftp, f):
 		return None
 	return xml_file
 
-def load(collection, documents):
+def load(collection, documents, upsert=False):
 	for document in documents:
+	# 	if upsert:
+	# 		spec = {'_id': document['_id']}
+	# 		collection.update(spec, document, upsert=True, multi=False)
+	# 	else:
+		# print document
 		collection.insert(document)
