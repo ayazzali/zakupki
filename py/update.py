@@ -33,7 +33,9 @@ if __name__ == '__main__':
 	print ts(), 'Starting {type} update'.format(type=args.type)
 	print ts(), 'Connecting mongodb'
 	client = MongoClient()
+
 	db = client.zakupki
+	db.authenticate('roveo', 'Ml3o5CHb')
 	for coll in args.collections:
 		print ts(), 'Updating {coll}'.format(coll=coll)
 		collection = db[coll]
