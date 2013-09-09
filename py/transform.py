@@ -1,5 +1,4 @@
 from utils import *
-import json
 
 def transform_notification(xml):
 	document = {}
