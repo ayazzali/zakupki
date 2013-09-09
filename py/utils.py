@@ -81,9 +81,8 @@ def extract(ftp, f):
 
 def load(collection, documents, upsert=False):
 	for document in documents:
-	# 	if upsert:
-	# 		spec = {'_id': document['_id']}
-	# 		collection.update(spec, document, upsert=True, multi=False)
-	# 	else:
-		# print document
-		collection.insert(document)
+		if upsert:
+			spec = {'_id': document['_id']}
+			collection.update(spec, document, upsert=True, multi=False)
+		else:
+			collection.insert(document)
