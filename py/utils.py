@@ -86,3 +86,19 @@ def load(collection, documents, upsert=False):
 			collection.update(spec, document, upsert=True, multi=False)
 		else:
 			collection.insert(document)
+
+def inc_masks(collection, folder_name):
+	one_day = timedelta(days=1)
+	today = datetime.today()
+	cur = collection.find({'folder_name':folder_name},{'publish_date':1,'_id':0}).sort([('publish_date', -1)]).limit(1)
+	if cur.count() > 0:
+		current_date = list(cur)[0]['publish_date'] + one_day
+	else:
+		current_date = datetime.today() - timedelta(days=7)
+	masks = []
+	while current_date <= today:
+		date1 = current_date.strftime('%Y%m%d')
+		date2 = (current_date + one_day).strftime('%Y%m%d')
+		masks.append('*_inc_{date1}_000000_{date2}_000000_*.xml.zip'.format(date1=date1, date2=date2))
+		current_date += one_day
+	return masks

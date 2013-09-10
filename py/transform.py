@@ -1,4 +1,4 @@
-from utils import *
+from utils import retrieve, ns
 
 def transform_notification(xml):
 	document = {}
