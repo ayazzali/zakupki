@@ -85,4 +85,4 @@ def contracts_etl(ftp, collection, update_type):
 							document['folder_name'] = region
 							documents.append(document)
 							xml.clear()
-					load(collection, documents)
+					load(collection, documents, upsert=True)
