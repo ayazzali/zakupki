@@ -1,15 +1,15 @@
 zakupki
 =======
 
-Zakupki (закупки) is my personal project. The purpose of the project is research of data that the Russian government provides on government procurement. Right now it is a single `Python` script (in multiple files) that loads the data (zipped `XML` at ftp://free:free@ftp.zakupki.gov.ru/) into `MongoDB`. `MongoDB` is used because the data is too irregular for relational databases.
+Zakupki (закупки) is my personal project. The purpose of the project is research of data that the Russian government provides on government procurement. Right now it is a single `Python` script (in multiple files) that loads the data (zipped `XML` at `ftp://free:free@ftp.zakupki.gov.ru/`) into `MongoDB`. `MongoDB` is used because the data is too irregular for relational databases.
 
 Usage
 -----
 
 `update.py <all|inc> [-c --contracts, -n --notifications,  -p --products]`
 
-First argument is the type of update ().
-* `all` does full update - drops the collection and loads all available data
+First argument is the type of update.
+* `all` does full update - drops the collection and loads all available data.
 * `inc` does incremental update. It searches maximum publish date in the corresponding collection (by region, if the data is divided this way) and loads the data that is published since that max date. If there is no data in the corresponding document group, max date is NULL and `inc` loads only last 7 days of data.
 
 The other arguments are collections to load. If the user provides no additional arguments, all available document types are loaded.
