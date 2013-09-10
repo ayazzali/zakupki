@@ -1,68 +1,85 @@
 import argparse
 from ftplib import FTP
-import re
-import psycopg2 as db
-from lxml import etree
-from datetime import datetime, timedelta
-import gc
+from pymongo import MongoClient
 
-from file_utils import * # ts(), retr(), unzip()
-from parse import *      # notification()
+from etl import *
+from utils import *
+
+'''
+	This is configuration.
+	
+	For each possible document type it provides
+	FTP connection to use and an ETL function to
+	execute.
+
+	ETL functions contain the higher-level logic
+	that depends on FTP folder structure and
+	documents type.
+
+	These functions call lower-level functions
+	such as extract() function that loads
+	the file from FTP server, unzips it and
+	returns a file-like object.
+
+	That object is parsed with etree.iterparse
+	(memory-efficient and fast), and for each
+	document in XML file transform_*() is called
+	that takes XML-etree object and returns the
+	corresponding dict.
+
+	All ETL functions are stored in etl.py,
+	transform_*() functions are in transform.py,
+	all the other are in utils.py.
+'''
+conf = {
+	'notifications': {
+		'etl': notifications_etl,
+		'ftp': FTP('ftp.zakupki.gov.ru', 'free', 'free')
+	},
+	'products': {
+		'etl': products_etl,
+		'ftp': FTP('ftp.zakupki.gov.ru', 'anonymous')
+	},
+	'contracts': {
+		'etl': contracts_etl,
+		'ftp': FTP('ftp.zakupki.gov.ru', 'free', 'free')
+	}
+}
 
 if __name__ == '__main__':
-	# command line arguments
-	argparser = argparse.ArgumentParser()
-	argparser.add_argument(dest='type', choices=('daily', 'full'))
-	argparser.add_argument('-n', '--notifications', dest='scope', action='append_const', const='notifications')
-	args = argparser.parse_args()
-	if not args.scope: args.scope = ['notifications']
+	# collect arguments
+	parser = argparse.ArgumentParser(description='Update zakupki database.')
+	'''
+	 The first argument is for update type:
+	 'all' means wipe database and load all data again,
+	 'inc' means load data that is absent in the db.
 
-	# connect FTP
-	print(ts(), 'connecting FTP...', end='\t')
-	zakupki_ftp = FTP('ftp.zakupki.gov.ru', 'free', 'free')
-	print('[DONE]')
+	 The other arguments are one per collection in mongodb
+	 or per document type on the source FTP server.
+	'''
+	parser.add_argument(choices=['all', 'inc'], dest='type', action='store')
+	parser.add_argument('-n', '--notifications', dest='collections', action='append_const', const='notifications')
+	parser.add_argument('-p', '--products', dest='collections', action='append_const', const='products')
+	parser.add_argument('-c', '--contracts', dest='collections', action='append_const', const='contracts')
+	args = parser.parse_args()
+	if not args.collections: # if no collections provided, use all
+		args.collections = ['contracts', 'products', 'notifications']
 
-	# connect postgresql database
-	print(ts(), 'Connecting database zakupki...', end='\t')
-	zakupki_db = db.connect(database='zakupki', user='roveo')
-	zakupki_cur = zakupki_db.cursor()
-	print('[DONE]')
+	print ts(), 'Starting {type} update'.format(type=args.type)
+	print ts(), 'Connecting mongodb'
+	client = MongoClient()
 
-	if args.type == 'full':
-		# truncate tables and drop indices
-		print(ts(), 'Truncating...', end='\t')
-		zakupki_cur.execute('truncate table notifications;')
-		zakupki_db.commit()
-		print('[DONE]')
-
-	# NLST folders
-	re_file = re.compile('.*\..*') # filter folders
-	folders = (name for name in zakupki_ftp.nlst() if not re_file.match(name))
-
-	ns = {'d': 'http://zakupki.gov.ru/oos/export/1', 's': 'http://zakupki.gov.ru/oos/types/1'} # XML namespace
-	# ['OK', 'EF', 'ZK', 'PO', 'SZ', 'Cancel']
-
-	for scope in args.scope:
-		for region in folders:
-			zakupki_ftp.cwd('/{region}/{scope}'.format(region=region, scope=scope)) # change wd
-			file_names = []
-			if args.type == 'daily':
-				zakupki_ftp.cwd('daily')
-				zakupki_cur.execute('select max(publish_date) from notifications where folder_name = %s;', (region,))
-				last_date = zakupki_cur.fetchone()[0]
-				if last_date:
-					current_date = last_date + timedelta(days=1)
-				else:
-					current_date = datetime.today() - timedelta(days=30)
-				end_date = datetime.today()
-				while current_date <= end_date: # from last date in this region to today
-					mask = current_date.strftime('*%Y%m%d_000000_') + (current_date + timedelta(days=1)).strftime('%Y%m%d_000000*.xml.zip')
-					file_names.extend(zakupki_ftp.nlst(mask))
-					current_date += timedelta(days=1)
-			elif args.type == 'full':
-				file_names.extend(zakupki_ftp.nlst('*.zip'))
-			insert_notifications(file_names, zakupki_db, zakupki_ftp, ns, region)
-
-	zakupki_ftp.close()
-	zakupki_cur.close()
-	zakupki_db.close()
+	db = client.zakupki
+	
+	# uncomment if mongodb uses authentication
+	# db.authenticate('user', 'passwd')
+	
+	for coll in args.collections:
+		print ts(), 'Updating {coll}'.format(coll=coll)
+		collection = db[coll]
+		if args.type == 'all':
+			collection.drop()
+		print ts(), 'Connecting FTP'
+		ftp = conf[coll]['ftp']
+		conf[coll]['etl'](ftp, collection, args.type)
+	client.close()
