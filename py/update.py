@@ -35,7 +35,7 @@ if __name__ == '__main__':
 	client = MongoClient()
 
 	db = client.zakupki
-	db.authenticate('roveo', 'Ml3o5CHb')
+	db.authenticate('update', 'raz dva tri putin uhodi')
 	for coll in args.collections:
 		print ts(), 'Updating {coll}'.format(coll=coll)
 		collection = db[coll]
