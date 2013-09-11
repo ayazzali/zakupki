@@ -7,7 +7,7 @@ from utils import inc_masks
 
 def contracts_etl(ftp, collection, update_type):
 	'''
-		For each folder on FTP: if 'inc' cwd to daily,
+		For each folder on FTP: if 'inc', cwd to daily,
 		get file masks from inc_masks (returns file masks
 		from last date in db up to today).
 		
