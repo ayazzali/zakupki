@@ -17,7 +17,7 @@ The other arguments are collections to load. If the user provides no additional 
 Dependencies
 ------------
 
-The script has two `Python` dependencies: `lxml` and `pymongo`.
+The script runs on `Python 2.7` and has two dependencies: `lxml` and `pymongo`.
 
 To install `lxml`:
 ```sh
