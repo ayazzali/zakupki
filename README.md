@@ -6,13 +6,24 @@ Zakupki (закупки) is my personal project. The purpose of the project is r
 Usage
 -----
 
-`update.py <all|inc> [-c --contracts, -n --notifications,  -p --products]`
+`update.py <all|inc> [-H --mongodb-host, -P --mongodb-port] [-mu --mongodb-user, -mp --mongodb-password] [-c --contracts, -n --notifications,  -p --products]`
 
 First argument is the type of update.
 * `all` does full update - drops collections and loads all available data.
 * `inc` does incremental update. It searches maximum publish date in the corresponding collection (by region, if the data is divided this way) and loads the data that is published since that max date. If there is no data in the corresponding document group, max date is NULL and `inc` loads only last 7 days of data.
 
+You can also provide host address and port if you `MongoDB` is not running on `localhost`. And username-password if you `MongoDB` uses authentication.
+
 The other arguments are collections to load. If the user provides no additional arguments, all available document types are loaded.
+
+Examples:
+```sh
+# load all data on products (OKDP classification) to the local mongodb (no authentication)
+python update.py all -p
+
+# make an incremental update of all available data on server `x.x.x.x`, port `15146`, with username `putin` and password `medvedev`
+python update.py inc -H x.x.x.x -P 15146 -mu putin -mp medvedev
+```
 
 Dependencies
 ------------
