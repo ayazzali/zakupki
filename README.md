@@ -9,10 +9,26 @@ Usage
 `update.py <all|inc> [-c --contracts, -n --notifications,  -p --products]`
 
 First argument is the type of update.
-* `all` does full update - drops the collection and loads all available data.
+* `all` does full update - drops collections and loads all available data.
 * `inc` does incremental update. It searches maximum publish date in the corresponding collection (by region, if the data is divided this way) and loads the data that is published since that max date. If there is no data in the corresponding document group, max date is NULL and `inc` loads only last 7 days of data.
 
 The other arguments are collections to load. If the user provides no additional arguments, all available document types are loaded.
+
+Dependencies
+------------
+
+The script has two dependencies: `lxml` and `pymongo`.
+
+To install `lxml`:
+```
+apt-get install python-dev libxml2-dev libxslt-dev
+pip install lxml
+```
+
+To install `pymongo`:
+```
+pip install pymongo
+```
 
 Info
 ----
