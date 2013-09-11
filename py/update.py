@@ -7,15 +7,18 @@ from etl import *
 from utils import *
 
 '''
-	This is configuration.
+	This is the main script that provides the
+	functionality.
 	
+	conf dict is a configuration.
+
 	For each possible document type it provides
 	FTP connection to use and an ETL function to
 	execute.
 
 	ETL functions contain the higher-level logic
 	that depends on FTP folder structure and
-	documents type.
+	document type.
 
 	These functions call lower-level functions
 	such as extract() function that loads
@@ -27,6 +30,9 @@ from utils import *
 	document in XML file transform_*() is called
 	that takes XML-etree object and returns the
 	corresponding dict.
+
+	Dicts are then inserted (or upserted) into
+	the database with load() function.
 
 	All ETL functions are stored in etl.py,
 	transform_*() functions are in transform.py,
