@@ -17,17 +17,28 @@ The other arguments are collections to load. If the user provides no additional 
 Dependencies
 ------------
 
-The script has two dependencies: `lxml` and `pymongo`.
+The script has two `Python` dependencies: `lxml` and `pymongo`.
 
 To install `lxml`:
-```
+```sh
 apt-get install python-dev libxml2-dev libxslt-dev
 pip install lxml
 ```
 
 To install `pymongo`:
-```
+```sh
 pip install pymongo
+```
+
+And, of course, you have to install `MongoDB`. Current version of the script requires `mongodb-10gen` version `2.4.6`, you can find installation instructions (for Linux Ubuntu) here:
+http://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/
+
+If you are short on time, just run this to install the latest version:
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
+sudo apt-get update
+sudo apt-get install mongodb-10gen
 ```
 
 Info
