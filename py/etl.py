@@ -3,7 +3,7 @@ from lxml import etree
 from datetime import datetime, timedelta
 
 from transform import *
-from utils import inc_masks
+from utils import *
 
 def contracts_etl(ftp, collection, update_type):
 	'''
