@@ -25,6 +25,7 @@ def contracts_etl(ftp, collection, update_type):
 	for f in files:
 		size += ftp.size(f)
 	print ts(), 'Loading {len} files, {size} Mb total'.format(len=len(files), size=round(size / (1024 * 1024), 2))
+	# inserting files
 	for f in files:
 		print ts(), f
 		xml_file = extract(ftp, f)
