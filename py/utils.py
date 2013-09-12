@@ -2,6 +2,7 @@ from datetime import datetime, date, timedelta
 from tempfile import TemporaryFile
 from zipfile import ZipFile, ZipInfo
 import traceback
+import re
 
 def ns(): # XML namespace
 	return {
@@ -18,6 +19,7 @@ def nlst(ftp, mask, retry=3):
 		return ftp.nlst(mask)
 	except:
 		if retry > 0:
+			# print 'Retry NLST'
 			return nlst(ftp, mask, retry-1)
 		else:
 			return None
@@ -64,7 +66,6 @@ def parse_date(date):
 	return datetime.strptime(date, '%Y-%m-%d')
 
 def extract(ftp, f):
-	print ts(), f
 	try:
 		zip_file = retr(ftp, f, retry=10)
 		xml_file = unzip(zip_file)
@@ -87,18 +88,37 @@ def load(collection, documents, upsert=False):
 		else:
 			collection.insert(document)
 
-def inc_masks(collection, folder_name):
-	one_day = timedelta(days=1)
-	today = datetime.today()
+def inc_files(collection, ftp, folder_name):
+	# list all files for this region / collection
+	all_files = []
+	ftp.cwd('/{region}/{collection}'.format(region=folder_name, collection=collection.name))
+	ls = nlst(ftp, '*.xml.zip')
+	all_files.extend(['/{region}/{collection}/'.format(region=folder_name, collection=collection.name) + x for x in ls])
+	ftp.cwd('daily')
+	ls = nlst(ftp, '*.xml.zip')
+	all_files.extend(['/{region}/{collection}/daily/'.format(region=folder_name, collection=collection.name) + x for x in ls])
+	# figure out last date in this collection / region
 	cur = collection.find({'folder_name':folder_name},{'publish_date':1,'_id':0}).sort([('publish_date', -1)]).limit(1)
 	if cur.count() > 0:
-		current_date = list(cur)[0]['publish_date'] + one_day
-	else:
-		current_date = datetime.today() - timedelta(days=7)
-	masks = []
-	while current_date <= today:
-		date1 = current_date.strftime('%Y%m%d')
-		date2 = (current_date + one_day).strftime('%Y%m%d')
-		masks.append('*_inc_{date1}_000000_{date2}_000000_*.xml.zip'.format(date1=date1, date2=date2))
-		current_date += one_day
-	return masks
+		last_date = list(cur)[0]['publish_date']
+	else: # if there are no records in the db, return all files
+		return all_files
+	last_date = datetime(last_date.year, last_date.month, last_date.day) # truncate to last_date to days
+	files = [] # list for filtered files
+	pattern = '.*_(\d{8})_000000_(\d{8})_000000_.*\.xml.zip$'
+	for f in all_files:
+		str_date = re.match(pattern, f).group(1) # get 1st date from the filename
+		file_date = datetime.strptime(str_date, '%Y%m%d')
+		if file_date >= last_date: # if we need the file, add it to files list
+			files.append(f)
+	return files
+
+def all_files(collection, ftp, folder_name): # list all files for this region / collection
+	files = []
+	ftp.cwd('/{region}/{collection}'.format(region=folder_name, collection=collection.name))
+	ls = nlst(ftp, '*.xml.zip')
+	files.extend(['/{region}/{collection}/'.format(region=folder_name, collection=collection.name) + x for x in ls])
+	ftp.cwd('daily')
+	ls = nlst(ftp, '*.xml.zip')
+	files.extend(['/{region}/{collection}/daily/'.format(region=folder_name, collection=collection.name) + x for x in ls])
+	return files

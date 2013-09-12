@@ -39,10 +39,10 @@ from utils import *
 	all the other are in utils.py.
 '''
 conf = {
-	'notifications': {
-		'etl': notifications_etl,
-		'ftp': FTP('ftp.zakupki.gov.ru', 'free', 'free')
-	},
+	# 'notifications': {
+	# 	'etl': notifications_etl,
+	# 	'ftp': FTP('ftp.zakupki.gov.ru', 'free', 'free')
+	# },
 	'products': {
 		'etl': products_etl,
 		'ftp': FTP('ftp.zakupki.gov.ru', 'anonymous')
@@ -57,23 +57,23 @@ if __name__ == '__main__':
 	# collect arguments
 	parser = argparse.ArgumentParser(description='Update zakupki database.')
 	'''
-	 The first argument is for update type:
-	 'all' means wipe database and load all data again,
-	 'inc' means load data that is absent in the db.
+		 The first argument is for update type:
+		 'all' means wipe database and load all data again,
+		 'inc' means load data that is absent in the db.
 
-	 The second and third arguments are for MongoDB authentication.
-	 If provided, the script uses auth, if your database uses no
-	 authentication, just ommit them.
+		 The second and third arguments are for MongoDB authentication.
+		 If provided, the script uses auth, if your database uses no
+		 authentication, just ommit them.
 
-	 The other arguments are one per collection in mongodb
-	 or per document type on the source FTP server.
+		 The other arguments are one per collection in mongodb
+		 or per document type on the source FTP server.
 	'''
 	parser.add_argument(choices=['all', 'inc'], dest='type', action='store')
 	parser.add_argument('-mu', '--mongodb-user', dest='user', action='store')
 	parser.add_argument('-mp', '--mongodb-password', dest='passwd', action='store')
 	parser.add_argument('-P', '--mongodb-port', dest='port', action='store', default=27017, type=int)
 	parser.add_argument('-H', '--mongodb-host', dest='host', action='store', default='localhost')
-	parser.add_argument('-n', '--notifications', dest='collections', action='append_const', const='notifications')
+	# parser.add_argument('-n', '--notifications', dest='collections', action='append_const', const='notifications')
 	parser.add_argument('-p', '--products', dest='collections', action='append_const', const='products')
 	parser.add_argument('-c', '--contracts', dest='collections', action='append_const', const='contracts')
 	args = parser.parse_args()
