@@ -73,6 +73,8 @@ if __name__ == '__main__':
 	parser.add_argument('-mp', '--mongodb-password', dest='passwd', action='store')
 	parser.add_argument('-P', '--mongodb-port', dest='port', action='store', default=27017, type=int)
 	parser.add_argument('-H', '--mongodb-host', dest='host', action='store', default='localhost')
+	
+	
 	parser.add_argument('-n', '--notifications', dest='collections', action='append_const', const='notifications')
 	parser.add_argument('-p', '--products', dest='collections', action='append_const', const='products')
 	parser.add_argument('-c', '--contracts', dest='collections', action='append_const', const='contracts')
