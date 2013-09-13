@@ -49,11 +49,9 @@ def products_etl(ftp, collection, update_type):
 	for f in files:
 		xml_file = extract(ftp, f)
 		if xml_file:
-			documents = []
 			for event, xml in etree.iterparse(xml_file, tag='{http://zakupki.gov.ru/oos/types/1}nsiProduct'):
 				if event == 'end':
 					document = transform_product(xml)
-					if document:
-						documents.append(document)
+					load(collection, document, upsert=True)
 					xml.clear()
-			load(collection, documents, upsert=True)
+			
