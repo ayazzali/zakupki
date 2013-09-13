@@ -52,6 +52,7 @@ def products_etl(ftp, collection, update_type):
 			for event, xml in etree.iterparse(xml_file, tag='{http://zakupki.gov.ru/oos/types/1}nsiProduct'):
 				if event == 'end':
 					document = transform_product(xml)
-					load(collection, document, upsert=True)
+					if document: # products document can be None if code is a string (it happens)
+						load(collection, document, upsert=True)
 					xml.clear()
 			
