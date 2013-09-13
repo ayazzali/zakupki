@@ -80,15 +80,22 @@ def extract(ftp, f):
 		return None
 	return xml_file
 
-def load(collection, documents, upsert=False):
-	for document in documents:
-		if upsert:
-			spec = {'_id': document['_id']}
-			collection.update(spec, document, upsert=True, multi=False)
-		else:
-			collection.insert(document)
+def load(collection, document, upsert=False):
+	if upsert:
+		spec = {'_id': document['_id']}
+		collection.update(spec, document, upsert=True, multi=False)
+	else:
+		collection.insert(document)
 
 def inc_files(collection, ftp, folder_name):
+	# get metadata
+	meta = collection.database[collection.name + '_meta']
+	cur = meta.find({'folder_name': folder_name})
+	if cur.count() == 1:
+		last_date = list(cur)[0]['max_date']
+	else: # if no max_date in this region yet, set last_date to None
+		last_date = None
+		meta.insert({'folder_name': folder_name, 'max_date': datetime(2000, 1, 1)}) # and create meta max_date element
 	# list all files for this region / collection
 	all_files = []
 	ftp.cwd('/{region}/{collection}'.format(region=folder_name, collection=collection.name))
@@ -97,23 +104,21 @@ def inc_files(collection, ftp, folder_name):
 	ftp.cwd('daily')
 	ls = nlst(ftp, '*.xml.zip')
 	all_files.extend(['/{region}/{collection}/daily/'.format(region=folder_name, collection=collection.name) + x for x in ls])
-	# figure out last date in this collection / region
-	cur = collection.find({'folder_name':folder_name},{'publish_date':1,'_id':0}).sort([('publish_date', -1)]).limit(1)
-	if cur.count() > 0:
-		last_date = list(cur)[0]['publish_date']
-	else: # if there are no records in the db, return all files
+	if not last_date: # if there is no metadata, return all files
 		return all_files
-	last_date = datetime(last_date.year, last_date.month, last_date.day) # truncate to last_date to days
-	files = [] # list for filtered files
-	pattern = '.*_(\d{8})_000000_(\d{8})_000000_.*\.xml.zip$'
-	for f in all_files:
-		str_date = re.match(pattern, f).group(1) # get 1st date from the filename
-		file_date = datetime.strptime(str_date, '%Y%m%d')
-		if file_date >= last_date: # if we need the file, add it to files list
-			files.append(f)
-	return files
+	else:
+		files = [] # list for filtered files
+		pattern = '.*_(\d{8})_000000_(\d{8})_000000_.*\.xml.zip$'
+		for f in all_files:
+			str_date = re.match(pattern, f).group(1) # get 1st date from the filename
+			file_date = datetime.strptime(str_date, '%Y%m%d')
+			if file_date >= last_date: # if we need the file, add it to files list
+				files.append(f)
+		return files
 
 def all_files(collection, ftp, folder_name): # list all files for this region / collection
+	meta = collection.database[collection.name + '_meta']
+	meta.insert({'folder_name': folder_name, 'max_date': datetime(2000, 1, 1)}) # meta max_date element
 	files = []
 	ftp.cwd('/{region}/{collection}'.format(region=folder_name, collection=collection.name))
 	ls = nlst(ftp, '*.xml.zip')

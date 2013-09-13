@@ -97,9 +97,8 @@ if __name__ == '__main__':
 	for coll in args.collections:
 		print ts(), 'Updating {coll}'.format(coll=coll)
 		collection = db[coll]
-		# meta = db[coll + '_meta']
 		if args.type == 'all':
-			# meta.drop()
+			db[coll + '_meta'].drop() # drop metadata
 			collection.drop()
 		print ts(), 'Connecting FTP'
 		ftp = conf[coll]['ftp']
