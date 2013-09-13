@@ -46,6 +46,10 @@ def products_etl(ftp, collection, update_type):
 		mask = 'nsiProduct_inc_*.xmp.zip'
 	ftp.cwd('/auto/product')
 	files = ftp.nlst(mask)
+	size = 0.0
+	for f in files:
+		size += ftp.size(f)
+	print 'Loading {len} files, {size} Mb total.'.format(len=len(files), size=round(size / (1024 * 1024), 2))
 	for f in files:
 		print ts(), f
 		xml_file = extract(ftp, f)
@@ -58,4 +62,3 @@ def products_etl(ftp, collection, update_type):
 					xml.clear()
 		else:
 			print ts(), 'Error loading file!'
-			
