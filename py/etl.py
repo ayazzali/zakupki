@@ -22,8 +22,8 @@ def contracts_etl(ftp, collection, update_type):
 		region_files = inc_files(collection, ftp, region) if update_type == 'inc' else all_files(collection, ftp, region)
 		files.extend([(f, region) for f in region_files])
 	size = 0.0
-	# for (f, region) in files:
-	# 	size += ftp.size(f)
+	for (f, region) in files:
+		size += ftp.size(f)
 	print ts(), 'Loading {len} files, {size} Mb total'.format(len=len(files), size=round(size / (1024 * 1024), 2))
 	# inserting files
 	meta = collection.database[collection.name + '_meta']
