@@ -55,4 +55,6 @@ def products_etl(ftp, collection, update_type):
 					if document: # products document can be None if code is a string (it happens)
 						load(collection, document, upsert=True)
 					xml.clear()
+		else:
+			print ts(), 'Error loading file!'
 			
