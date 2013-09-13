@@ -47,6 +47,7 @@ def products_etl(ftp, collection, update_type):
 	ftp.cwd('/auto/product')
 	files = ftp.nlst(mask)
 	for f in files:
+		print ts(), f
 		xml_file = extract(ftp, f)
 		if xml_file:
 			for event, xml in etree.iterparse(xml_file, tag='{http://zakupki.gov.ru/oos/types/1}nsiProduct'):
