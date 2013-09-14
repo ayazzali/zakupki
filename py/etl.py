@@ -24,7 +24,7 @@ def contracts_etl(ftp, collection, update_type):
 		for f in region_files:
 			size += ftp.size(f)
 		files.extend([(f, region) for f in region_files])
-		print ts(), region, size
+		print ts(), region, round(size / (1024 * 1024), 2), 'Mb'
 		total_size += size
 	print ts(), 'Loading {len} files, {size} Mb total'.format(len=len(files), size=round(total_size / (1024 * 1024), 2))
 	# inserting files
