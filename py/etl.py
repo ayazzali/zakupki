@@ -17,14 +17,16 @@ def contracts_etl(ftp, collection, update_type):
 	re_file = re.compile('.*\..*') # filter folders
 	folders = (name for name in ftp.nlst() if not re_file.match(name))
 	files = []
+	total_size = 0.0
 	for region in folders:
-		print ts(), region
 		region_files = inc_files(collection, ftp, region) if update_type == 'inc' else all_files(collection, ftp, region)
+		size = 0.0
+		for f in region_files:
+			size += ftp.size(f)
 		files.extend([(f, region) for f in region_files])
-	size = 0.0
-	for (f, region) in files:
-		size += ftp.size(f)
-	print ts(), 'Loading {len} files, {size} Mb total'.format(len=len(files), size=round(size / (1024 * 1024), 2))
+		print ts(), region, size
+		total_size += size
+	print ts(), 'Loading {len} files, {size} Mb total'.format(len=len(files), size=round(total_size / (1024 * 1024), 2))
 	# inserting files
 	meta = collection.database[collection.name + '_meta']
 	for (f, region) in files:
