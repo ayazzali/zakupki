@@ -44,10 +44,12 @@ def contracts_etl(ftp, collection, update_type):
 def products_etl(ftp, collection, update_type):
 	if update_type == 'all':
 		mask = '*.xml.zip'
-	else:
-		mask = 'nsiProduct_inc_*.xmp.zip'
-	ftp.cwd('/auto/product')
-	files = ftp.nlst(mask)
+	elif update_type == 'inc':
+		mask = 'nsiProduct_inc_*.xml.zip'
+	ftp.cwd('/auto/product/')
+	print mask
+	files = nlst(ftp, mask)
+	print files
 	size = 0.0
 	for f in files:
 		size += ftp.size(f)
