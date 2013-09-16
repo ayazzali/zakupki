@@ -47,9 +47,7 @@ def products_etl(ftp, collection, update_type):
 	elif update_type == 'inc':
 		mask = 'nsiProduct_inc_*.xml.zip'
 	ftp.cwd('/auto/product/')
-	print mask
 	files = nlst(ftp, mask)
-	print files
 	size = 0.0
 	for f in files:
 		size += ftp.size(f)
