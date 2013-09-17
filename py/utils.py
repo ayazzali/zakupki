@@ -24,6 +24,11 @@ def nlst(ftp, mask, retry=3):
 		else:
 			return None
 
+def ftp_size(ftp, files):
+	s = 0
+	for f in files:
+		s += ftp.size(f)
+	return float(s)
 
 def retr(ftp, path, retry=3): # retrieve file via FTP and return
 	tmp = TemporaryFile()

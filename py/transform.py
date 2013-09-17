@@ -50,6 +50,51 @@ def transform_product(xml):
 	document['actual'] = True if actual == 'true' else False
 	return document
 
+def transform_organization(xml):
+	document = {}
+	document['_id'] = retrieve(xml, './s:regNumber/text()', int)
+	document['short_name'] = retrieve(xml, './s:shortName/text()')
+	document['full_name'] = retrieve(xml, './s:fullName/text()')
+	document['factual_address'] = {}
+	document['factual_address']['okato'] = retrieve(xml, './s:factualAddress/s:OKATO/text()')
+	document['factual_address']['building'] = retrieve(xml, './s:factualAddress/s:building/text()', int)
+	document['factual_address']['country'] = {}
+	document['factual_address']['country']['code'] = retrieve(xml, './s:factualAddress/s:country/s:countryCode/text()', int)
+	document['factual_address']['country']['name'] = retrieve(xml, './s:factualAddress/s:country/s:countryFullName/text()')
+	document['factual_address']['region'] = {}
+	document['factual_address']['region']['type'] = retrieve(xml, './s:factualAddress/s:region/s:kladrType/text()')
+	document['factual_address']['region']['code'] = retrieve(xml, './s:factualAddress/s:region/s:kladrCode/text()')
+	document['factual_address']['region']['name'] = retrieve(xml, './s:factualAddress/s:region/s:fullName/text()')
+	document['factual_address']['city'] = {}
+	document['factual_address']['city']['type'] = retrieve(xml, './s:factualAddress/s:city/s:kladrType/text()')
+	document['factual_address']['city']['code'] = retrieve(xml, './s:factualAddress/s:city/s:kladrCode/text()')
+	document['factual_address']['city']['name'] = retrieve(xml, './s:factualAddress/s:city/s:fullName/text()')
+	document['factual_address']['zip'] = retrieve(xml, './s:factualAddress/s:zip/text()', int)
+	document['postal_address'] = retrieve(xml, './s:postalAddress/text()')
+	document['email'] = retrieve(xml, './s:email/text()')
+	document['phone'] = retrieve(xml, './s:phone/text()')
+	document['fax'] = retrieve(xml, './s:fax/text()')
+	document['contact_person'] = {}
+	document['contact_person']['last_name'] = retrieve(xml, './s:contactPerson/s:lastName/text()')
+	document['contact_person']['first_name'] = retrieve(xml, './s:contactPerson/s:firstName/text()')
+	document['contact_person']['middle_name'] = retrieve(xml, './s:contactPerson/s:middleName/text()')
+	document['accounts'] = []
+	for account_xml in xml.xpath('./s:accounts/s:account', namespaces=ns()):
+		account = {}
+		account['bik'] = retrieve(account_xml, './s:bik/text()', int)
+		account['payment_account'] = retrieve(account_xml, './s:paymentAccount/text()')
+		account['personal_account'] = retrieve(account_xml, './s:personalAccount/text()')
+		document['accounts'].append(account)
+	document['budgets'] = []
+	for budget_xml in xml.xpath('./s:budgets/s:budget', namespaces=ns()):
+		budget = {}
+		budget['code'] = retrieve(budget_xml, './s:code/text()', int)
+		budget['name'] = retrieve(budget_xml, './s:name/text()')
+		document['budgets'].append(budget)
+	document['inn'] = retrieve(xml, './s:inn/text()', int)
+	document['kpp'] = retrieve(xml, './s:kpp/text()', int)
+	return document
+
 # Switched off
 
 def transform_notification(xml):
