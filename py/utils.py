@@ -113,7 +113,7 @@ def inc_files(collection, ftp, folder_name):
 		return all_files
 	else:
 		files = [] # list for filtered files
-		pattern = '.*_(\d{8})_000000_(\d{8})_000000_.*\.xml.zip$'
+		pattern = '.*_(\d{8})_(\d{6})_(\d{8})_(\d{6})_.*\.xml.zip$'
 		for f in all_files:
 			str_date = re.match(pattern, f).group(1) # get 1st date from the filename
 			file_date = datetime.strptime(str_date, '%Y%m%d')
