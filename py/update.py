@@ -109,4 +109,5 @@ if __name__ == '__main__':
 		print ts(), 'Connecting FTP'
 		ftp = conf[coll]['ftp']
 		conf[coll]['etl'](ftp, collection, args.type)
+		ftp.close()
 	client.close()
