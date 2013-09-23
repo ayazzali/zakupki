@@ -45,15 +45,15 @@ conf = {
 	# },
 	'contracts': {
 		'etl': contracts_etl,
-		'ftp': FTP('ftp.zakupki.gov.ru', 'free', 'free')
+		'ftp': ('ftp.zakupki.gov.ru', 'free', 'free')
 	},
 	'products': {
 		'etl': products_etl,
-		'ftp': FTP('ftp.zakupki.gov.ru', 'anonymous')
+		'ftp': ('ftp.zakupki.gov.ru', 'anonymous', None)
 	},
 	'organizations': {
 		'etl': organizations_etl,
-		'ftp': FTP('ftp.zakupki.gov.ru', 'anonymous')
+		'ftp': ('ftp.zakupki.gov.ru', 'anonymous', None)
 	}
 }
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 			db[coll + '_meta'].drop() # drop metadata
 			collection.drop()
 		print ts(), 'Connecting FTP'
-		ftp = conf[coll]['ftp']
+		ftp = FTP(conf[coll]['ftp'][0], conf[coll]['ftp'][1], conf[coll]['ftp'][2])
 		conf[coll]['etl'](ftp, collection, args.type)
 		ftp.close()
 	client.close()
