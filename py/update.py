@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 import argparse
 from ftplib import FTP
 from pymongo import MongoClient
