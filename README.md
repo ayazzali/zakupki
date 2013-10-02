@@ -10,7 +10,7 @@ Usage
 update.py <all|inc>
 	[-H --mongodb-host, -P --mongodb-port]
 	[-mu --mongodb-user, -mp --mongodb-password]
-	[-c --contracts,  -p --products]
+	[-c --contracts,  -p --products, -o --organizations]
 ```
 
 First argument is the type of update.

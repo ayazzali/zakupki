@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 import argparse
 from ftplib import FTP
 from pymongo import MongoClient
@@ -43,13 +45,17 @@ conf = {
 	# 	'etl': notifications_etl,
 	# 	'ftp': FTP('ftp.zakupki.gov.ru', 'free', 'free')
 	# },
-	'products': {
-		'etl': products_etl,
-		'ftp': FTP('ftp.zakupki.gov.ru', 'anonymous')
-	},
 	'contracts': {
 		'etl': contracts_etl,
-		'ftp': FTP('ftp.zakupki.gov.ru', 'free', 'free')
+		'ftp': ('ftp.zakupki.gov.ru', 'free', 'free')
+	},
+	'products': {
+		'etl': products_etl,
+		'ftp': ('ftp.zakupki.gov.ru', 'anonymous', None)
+	},
+	'organizations': {
+		'etl': organizations_etl,
+		'ftp': ('ftp.zakupki.gov.ru', 'anonymous', None)
 	}
 }
 
@@ -75,11 +81,12 @@ if __name__ == '__main__':
 	parser.add_argument('-mp', '--mongodb-password', dest='passwd', action='store')
 	
 	# parser.add_argument('-n', '--notifications', dest='collections', action='append_const', const='notifications')
-	parser.add_argument('-p', '--products', dest='collections', action='append_const', const='products')
 	parser.add_argument('-c', '--contracts', dest='collections', action='append_const', const='contracts')
+	parser.add_argument('-p', '--products', dest='collections', action='append_const', const='products')
+	parser.add_argument('-o', '--organizations', dest='collections', action='append_const', const='organizations')
 	args = parser.parse_args()
 	if not args.collections: # if no collections provided, use all
-		args.collections = ['contracts', 'products']
+		args.collections = ['contracts', 'products', 'organizations']
 
 	print ts(), 'Starting {type} update'.format(type=args.type)
 	print ts(), 'Connecting mongodb'
@@ -102,6 +109,7 @@ if __name__ == '__main__':
 			db[coll + '_meta'].drop() # drop metadata
 			collection.drop()
 		print ts(), 'Connecting FTP'
-		ftp = conf[coll]['ftp']
+		ftp = FTP(conf[coll]['ftp'][0], conf[coll]['ftp'][1], conf[coll]['ftp'][2])
 		conf[coll]['etl'](ftp, collection, args.type)
+		ftp.close()
 	client.close()
