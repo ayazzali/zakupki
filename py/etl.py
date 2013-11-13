@@ -15,7 +15,7 @@ def contracts_etl(ftp, collection, update_type):
 	# Build file list
 	print ts(), 'Building file list'
 	re_file = re.compile('.*\..*') # filter folders
-	folders = ('Moskva', ) # (name for name in ftp.nlst() if not re_file.match(name))
+	folders = (name for name in ftp.nlst() if not re_file.match(name))
 	files = []
 	total_size = 0.0
 	for region in folders:
@@ -38,7 +38,6 @@ def contracts_etl(ftp, collection, update_type):
 					xml.clear()
 					load(collection, document, upsert=True)
 					meta.update({'folder_name': region, 'max_date': {'$lt': document['publish_date'] } }, {'$set': {'max_date': document['publish_date'] } })
-		# xml_file.close()
 
 def products_etl(ftp, collection, update_type):
 	if update_type == 'all':
