@@ -72,7 +72,7 @@ def parse_date(date):
 
 def extract(ftp, f):
 	try:
-		zip_file = retr(ftp, f, retry=10)
+		zip_file = retr(ftp, f, retry=5)
 		xml_file = unzip(zip_file)
 	except KeyboardInterrupt:
 		traceback.print_exc()
