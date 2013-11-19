@@ -15,7 +15,7 @@ def contracts_etl(ftp, collection, update_type):
 	# Build file list
 	print ts(), 'Building file list'
 	re_file = re.compile('.*\..*') # filter folders
-	folders = ('Adygeja_Resp', ) # (name for name in ftp.nlst() if not re_file.match(name))
+	folders = (name for name in ftp.nlst() if not re_file.match(name))
 	files = []
 	total_size = 0.0
 	for region in folders:
