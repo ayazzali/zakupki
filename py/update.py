@@ -104,8 +104,8 @@ if __name__ == '__main__':
 		print ts(), 'Updating {coll}'.format(coll=coll)
 		collection = db[coll]
 		if args.type == 'all':
-			db[coll + '_meta'].drop() # drop metadata
-			collection.drop()
+			db[coll + '_meta'].remove({}) # clear metadata
+			collection.remove({}) # clear data
 		print ts(), 'Connecting FTP'
 		ftp = FTP(conf[coll]['ftp'][0], conf[coll]['ftp'][1], conf[coll]['ftp'][2])
 		conf[coll]['etl'](ftp, collection, args.type)

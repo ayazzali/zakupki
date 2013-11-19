@@ -91,6 +91,10 @@ def load(collection, document, upsert=False):
 		collection.update(spec, document, upsert=True, multi=False)
 	else:
 		collection.insert(document)
+	last_error = collection.database.command({'getLastError': 1})
+	if not last_error['ok']:
+		print 'Error during insert or update!!'
+		exit()
 
 def inc_files(collection, ftp, folder_name):
 	# get metadata
