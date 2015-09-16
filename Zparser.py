@@ -17,23 +17,26 @@ class Zparser:
         '''
 
     def to_dicts(self, f):
-        ''' Extract all documents from a file and return them as
-            generator of dicts.
+        ''' Extract a document from a file and return it as dict.
         '''
-        document_element = f.name.split('_')[0]
-        xml = etree.iterparse(f)
-        for event, element in xml:
+        doc_type = f.name.split('_')[0]
+        xml = etree.parse(f)
+        elements = xml.xpath('/ns2:export/*', namespaces={'ns2': 'http://zakupki.gov.ru/oos/export/1'})
+        for element in elements:
             name = localname(element)
-            if name == document_element:
-                result = self.element_to_dict(element)
-                result['doc_type'] = name
-                yield result
+            result = self.element_to_dict(element)
+            result['doc_type'] = doc_type
+            result['node_type'] = name
+            yield result
 
-    def element_to_dict(self, element):
+    def element_to_dict(self, element, truncate_size=512):
         ''' Recursively convert a single etree.Element node into dict.
         '''
         if len(element) == 0:  # leaf node, no children
-            return element.text
+            text = element.text
+            if text and len(text) >= truncate_size:
+                text = text[:truncate_size] + '[...]'
+            return text
         # non-leaf
         name_counts = collections.Counter([localname(child) for child in element.iterchildren()])
         result = {}

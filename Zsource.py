@@ -29,7 +29,6 @@ class Zsource:
         all_regions = self.list_regions()
         for current_folder in regions:
             while True:
-                print(' ' * 100, end='\r')
                 print(current_folder, len(self.files), sep='\t')
                 nlst = self.connection.nlst(current_folder)
                 folders.extend([x for x in nlst if not file_re.match(x) and x != current_folder])
