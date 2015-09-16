@@ -55,15 +55,20 @@ class Zsource:
             from self.files list. Additionally can be filtered by document_type
             and region.
         '''
+        # TO-DO: Add date filter
         files = self.files
         if region and region in self.list_regions():
             files = [f for f in files if f.startswith(region)]
         if document_type and document_type in self.list_document_types():
             files = [f for f in files if document_type in f]
+        l = len(files)
+        c = 1
         for path in files:
+            print('{}/{}'.format(c, l))
+            sleep(1)
             for f in self.retr_file(path):
                 yield f
-            sleep(1)
+            c += 1
 
     def retr_file(self, path, retry=3):
         ''' Gererator that returns file handles for raw XML (unzipped) files
