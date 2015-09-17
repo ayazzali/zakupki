@@ -1,6 +1,7 @@
 from lxml import etree
 import json
 import collections
+from copy import deepcopy
 
 
 def localname(element):
@@ -16,22 +17,31 @@ class Zparser:
         ''' __init__
         '''
 
-    def to_dicts(self, f):
+    def to_dicts(self, f, unwind=None):
         ''' Extract a document from a file and return it as dict.
         '''
         doc_type = f.name.split('_')[0]
         xml = etree.parse(f)
         elements = xml.xpath('/ns2:export/*', namespaces={'ns2': 'http://zakupki.gov.ru/oos/export/1'})
         for element in elements:
-            name = localname(element)
-            result = self.element_to_dict(element)
-            result['doc_type'] = doc_type
-            result['node_type'] = name
-            yield result
+            element_name = localname(element)
+            element_dict = self.element_to_dict(element)
+            element_dict['doc_type'] = doc_type
+            element_dict['node_type'] = element_name
+            yield element_dict
+            if unwind:
+                for descendant in element.iterdescendants():
+                    descendant_name = localname(descendant)
+                    if descendant_name == unwind:
+                        descendant_dict = self.element_to_dict(descendant)
+                        descendant_dict['_parent'] = self.element_to_dict(element, max_depth=1)
+                        yield descendant_dict
 
-    def element_to_dict(self, element, truncate_size=512):
+    def element_to_dict(self, element, max_depth=5, truncate_size=512, depth=0):
         ''' Recursively convert a single etree.Element node into dict.
         '''
+        if depth > max_depth:
+            return '[...]'
         if len(element) == 0:  # leaf node, no children
             text = element.text
             if text and len(text) >= truncate_size:
@@ -43,9 +53,9 @@ class Zparser:
         for child in element.iterchildren():
             name = localname(child)
             if name_counts[name] == 1:  # node can be represented as nested dict
-                result[name] = self.element_to_dict(child)
+                result[name] = self.element_to_dict(child, depth=depth+1, max_depth=max_depth)
             else:  # multiple elements should be represented as nested list
                 if name not in result:
                     result[name] = []
-                result[name].append(self.element_to_dict(child))
+                result[name].append(self.element_to_dict(child, depth=depth+1, max_depth=max_depth))
         return result

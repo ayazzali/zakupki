@@ -1,3 +1,4 @@
+import os
 import re
 from ftplib import FTP
 from tempfile import TemporaryFile
@@ -29,7 +30,6 @@ class Zsource:
         all_regions = self.list_regions()
         for current_folder in regions:
             while True:
-                print(current_folder, len(self.files), sep='\t')
                 nlst = self.connection.nlst(current_folder)
                 folders.extend([x for x in nlst if not file_re.match(x) and x != current_folder])
                 if len(folders) == 0:
@@ -60,16 +60,12 @@ class Zsource:
             files = [f for f in files if f.startswith(region)]
         if document_type and document_type in self.list_document_types():
             files = [f for f in files if document_type in f]
-        l = len(files)
-        c = 1
         for path in files:
-            print('{}/{}'.format(c, l))
             sleep(1)
             for f in self.retr_file(path):
                 yield f
-            c += 1
 
-    def retr_file(self, path, retry=3):
+    def retr_file(self, path, retry=3, unzip=True):
         ''' Gererator that returns file handles for raw XML (unzipped) files
             inside a ZIP file at a given FTP path.
         '''
@@ -81,12 +77,21 @@ class Zsource:
             if down_size == ftp_size:
                 break
             retry -= 1
-        with ZipFile(tmp) as zf:
-            for i in zf.infolist():
-                yield zf.open(i)
-        tmp.close()
+        if unzip:
+            with ZipFile(tmp) as zf:
+                for i in zf.infolist():
+                    yield zf.open(i)
+            tmp.close()
+        else:
+            yield tmp
 
-    def download_files(self, dir='.', unzip=True):
+    def download_files(self, download_dir='.', unzip=True):
         ''' download_files
             TO-DO: Save raw XML (or ZIP) files into a directory.
         '''
+        files = self.files
+        for path in files:
+            for f in self.retr_file(path, unzip=unzip):
+                with open(os.path.join(download_dir, f.name), 'wb') as output:
+                    output.write(f.read())
+                f.close()
