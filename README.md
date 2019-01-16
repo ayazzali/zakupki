@@ -1,5 +1,7 @@
 zakupki
 =======
+##### поменялась структура на ftp!
+
 
 Zakupki (закупки) is my personal project. The purpose of the project is research of data that the Russian government provides on government procurement. Right now it is a single `Python` script (in multiple files) that loads the data (zipped `XML` at `ftp://free:free@ftp.zakupki.gov.ru/`) into `MongoDB`. `MongoDB` is used because the data is too irregular for relational databases.
 
